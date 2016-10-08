@@ -1,0 +1,23 @@
+{
+  "name": "parallac.js",
+  "version": "0.0.1",
+  "description": "distributed computing experiment based on Chapel",
+  "main": "index.js",
+  "dependencies": {
+    "uuid": "^2.0.3"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/briangu/parallac.js.git"
+  },
+  "author": "Brian Guarraci",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/briangu/parallac.js/issues"
+  },
+  "homepage": "https://github.com/briangu/parallac.js#readme"
+}

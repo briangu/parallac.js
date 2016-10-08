@@ -61,29 +61,29 @@ function on(locale) {
   }
 }
 
-var Locale = function(id) {
+var Locale = function (id) {
   this.id = id
   this.baseContext = createChildContext(baseSandbox)
 
   // TODO: scope by session
   this.contexts = [this.baseContext];
 
-  this.pushContext = function(context) {
+  this.pushContext = function (context) {
     const parentContext = this.currentContext()
     const childContext = createChildContext(parentContext, context)
     this.contexts.push(childContext)
     return childContext
   }
 
-  this.popContext = function() {
+  this.popContext = function () {
     return this.contexts.pop()
   }
 
-  this.clearContext = function() {
+  this.clearContext = function () {
     this.contexts = [this.baseContext]
   }
 
-  this.currentContext = function() {
+  this.currentContext = function () {
     return this.contexts[this.contexts.length - 1]
   }
 }
@@ -93,7 +93,7 @@ Locales.push(new Locale(1))
 Locales.push(new Locale(2))
 
 // simple 1-D domain
-var Domain = function(locales, len) {
+var Domain = function (locales, len) {
   const domain = []
 
   // TODO: add ability to specify domain contents
@@ -102,43 +102,61 @@ var Domain = function(locales, len) {
   }
 
   return {
-    length: function() {
-      return domain.length
-    },
-    get: function(x) {
+    length: domain.length,
+    get: function (x) {
       return domain[x]
     }
   }
 }
 
-var DistArray = function(domain) {
+function DistArrayIterator(da) {
+  return {
+    next() {
+      if (this._idx < da.length) {
+        return {
+          value: da.get(this._idx++)
+        };
+      } else {
+        return {
+          done: true
+        }
+      }
+    },
+    _idx: 0
+  }
+}
+
+var DistArray = function (domain) {
   const values = {}
   const objId = uuid.v4()
 
   // TODO: could use a list of unique locales to optimize this
-  for (var i = 0; i < domain.length(); i++) {
+  for (var i = 0; i < domain.length; i++) {
     if (!(objId in domain.get(i).currentContext())) {
       domain.get(i).currentContext()[objId] = {}
     }
   }
 
   return {
-    length: function() {
-      return domain.length
-    },
-    get: function(x) {
+    length: domain.length,
+    get: function (x) {
+      // on(domain.get(x))
+      //   .run(() => )
       return domain.get(x).currentContext()[objId][x] || 0
     },
-    put: function(x,v) {
+    put: function (x, v) {
       domain.get(x).currentContext()[objId][x] = v
-      // on(domain[x]).run(() => this[objId] = v)
+        // on(domain[x]).run(() => this[objId] = v)
     },
-    toString: function() {
+    toString: function () {
       var s = []
-      for (var i = 0; i < domain.length(); i++) {
-        s.push(this.get(i).toString())
+      for (let v of this) {
+        s.push(v)
       }
-      return s.toString()
+      return s.join(",")
+    },
+    [Symbol.iterator]: function() {
+      return DistArrayIterator(this)
     }
   }
 }
@@ -169,6 +187,18 @@ on(Locales[0])
 
 var d = new Domain(Locales, 2)
 var da = new DistArray(d)
+
+var it = {
+    [Symbol.iterator]() {
+        return DistArrayIterator(da)
+    }
+};
+for (let v of it) {
+  console.log("v", v)
+}
 console.log("da: ", da.toString())
-da.put(0,5)
+da.put(0, 5)
+for (let v of it) {
+  console.log("v", v)
+}
 console.log("da: ", da.toString())
