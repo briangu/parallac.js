@@ -21,14 +21,14 @@ var DistArray = parallac.DistArray
 //     console.log(c.toString())
 //   })
 
-session(Locales)
-  .with(() => {
-    d: new Domain(locales, 16)
-  })
-  .with(() => {
-    a: new DistArray(d),
-    b: new DistArray(d),
-    c: new DistArray(d)
+session(Locales, (locales) => {
+    let d = new Domain(locales, 16)
+    return {
+      d: d,
+      a: new DistArray(d),
+      b: new DistArray(d),
+      c: new DistArray(d)
+    }
   })
   .run(() => {
     a.set(1) // set all values to 1 across all locales

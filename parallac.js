@@ -40,6 +40,10 @@ var Locale = function (id, parentContext) {
 
     currentContext: function () {
       return contexts[contexts.length - 1]
+    },
+
+    here: function(locale) {
+      return locale.id == this.id
     }
   }
 }
@@ -48,12 +52,32 @@ const Locales = []
 Locales.push(new Locale(1))
 Locales.push(new Locale(2))
 
-function on(locale) {
+function session(locales) {
+  for (let locale of domain.locales) {
+    let currentContext = locale.currentContext()
+    locale.pushContext({
+      here: new Locale(locale.id, currentContext)
+    })
+  }
+
   return {
     with: function (obj) {
-      locale.pushContext(obj)
+      let sobj = JSON.stringify(obj)
+      for (let locale of locales) {
+        on(locale, () => {
+
+          locale.pushContext(obj)
+        })
+      }
       return this;
     },
+    run: function (fn) {
+      return on(locales[0]).run(fn)
+    }
+  }}
+
+function on(locale) {
+  return {
     run: function (fn) {
       return new Promise(function (resolve, reject) {
         try {
