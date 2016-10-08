@@ -1,5 +1,7 @@
 'use strict';
 
+var uuid = require('uuid')
+
 function createChildContext(parentContext, childContext) {
   parentContext = parentContext || {}
   return Object.assign(parentContext, childContext)
@@ -88,6 +90,58 @@ var Locale = function(id) {
 
 const Locales = []
 Locales.push(new Locale(1))
+Locales.push(new Locale(2))
+
+// simple 1-D domain
+var Domain = function(locales, len) {
+  const domain = []
+
+  // TODO: add ability to specify domain contents
+  for (var i = 0; i < len; i++) {
+    domain.push(locales[i % locales.length])
+  }
+
+  return {
+    length: function() {
+      return domain.length
+    },
+    get: function(x) {
+      return domain[x]
+    }
+  }
+}
+
+var DistArray = function(domain) {
+  const values = {}
+  const objId = uuid.v4()
+
+  // TODO: could use a list of unique locales to optimize this
+  for (var i = 0; i < domain.length(); i++) {
+    if (!(objId in domain.get(i).currentContext())) {
+      domain.get(i).currentContext()[objId] = {}
+    }
+  }
+
+  return {
+    length: function() {
+      return domain.length
+    },
+    get: function(x) {
+      return domain.get(x).currentContext()[objId][x] || 0
+    },
+    put: function(x,v) {
+      domain.get(x).currentContext()[objId][x] = v
+      // on(domain[x]).run(() => this[objId] = v)
+    },
+    toString: function() {
+      var s = []
+      for (var i = 0; i < domain.length(); i++) {
+        s.push(this.get(i).toString())
+      }
+      return s.toString()
+    }
+  }
+}
 
 on(Locales[0])
   .with({
@@ -112,3 +166,7 @@ on(Locales[0])
   .run(() => b * 2)
   .then((result) => console.log("result", result))
   .catch((err) => console.log(err))
+
+var d = new Domain(Locales, 2)
+var da = new DistArray(d)
+console.log("da: ", da.toString())
