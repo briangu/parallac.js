@@ -1,7 +1,6 @@
 'use strict';
 
 var parallac = require('./parallac')
-var Locales = parallac.Locales
 var on = parallac.on
 var Domain = parallac.Domain
 var DistArray = parallac.DistArray
@@ -11,7 +10,7 @@ on(Locales[0])
   .with({
     a: 1
   })
-  .run(() => {
+  .do(() => {
     function nop() {};
     var i = 1000000;
     while (i--) {
@@ -27,7 +26,7 @@ on(Locales[0])
   .with({
     b: 8
   })
-  .run(() => b * 2)
+  .do(() => b * 2)
   .then((result) => console.log("result", result))
   .catch((err) => console.log(err))
 

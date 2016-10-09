@@ -12,73 +12,89 @@ const BaseContext = {
   console: console
 }
 
+// var LocaleManager = function(here, localeConfig) {
+//   const sessions = {}
+//
+//   const rootContext = createChildContext(BaseContext)
+//
+//   function createSession(sessionId) {
+//     const sandbox = createChildContext(rootContext)
+//     sandbox.here = new Locale(here)
+//     sandbox.Locales = Object.keys(localeConfig)
+//
+//     sessions[sessionId] = {
+//       sandbox: sandbox
+//     }
+//   }
+//
+//   function deleteSession(sessionId) {
+//     delete sessions[sessionId]
+//   }
+//
+//   return {
+//     createNewSession: createNewSession,
+//     deleteSession: deleteSession
+//   }
+// }
+
 var Locale = function (id, parentContext) {
   parentContext = parentContext || BaseContext
 
   let baseContext = createChildContext(parentContext)
 
-  // TODO: scope by session
-  let contexts = [baseContext]
+  let contextStack = [baseContext]
 
   return {
     id: id,
-
     pushContext: function (context) {
-      const parentContext = this.currentContext()
+      const parentContext = this.context()
       const childContext = createChildContext(parentContext, context)
-      contexts.push(childContext)
+      contextStack.push(childContext)
       return childContext
     },
-
     popContext: function () {
-      return contexts.pop()
+      return contextStack.pop()
     },
-
-    clearContext: function () {
-      contexts = [baseContext]
+    resetContext: function () {
+      contextStack = [baseContext]
     },
-
-    currentContext: function () {
-      return contexts[contexts.length - 1]
-    },
-
-    here: function(locale) {
-      return locale.id == this.id
+    context: function () {
+      return contextStack[contextStack.length - 1]
     }
   }
 }
 
-const Locales = []
-Locales.push(new Locale(1))
-Locales.push(new Locale(2))
-
-function session(locales) {
-  for (let locale of domain.locales) {
-    let currentContext = locale.currentContext()
-    locale.pushContext({
-      here: new Locale(locale.id, currentContext)
-    })
-  }
-
-  return {
-    with: function (obj) {
-      let sobj = JSON.stringify(obj)
-      for (let locale of locales) {
-        on(locale, () => {
-
-          locale.pushContext(obj)
-        })
-      }
-      return this;
-    },
-    run: function (fn) {
-      return on(locales[0]).run(fn)
-    }
-  }}
+// function session(locales) {
+//   for (let locale of domain.locales) {
+//     let context = locale.context()
+//     locale.pushContext({
+//       here: new Locale(locale.id, context)
+//     })
+//   }
+//
+//   return {
+//     with: function (obj) {
+//       let sobj = JSON.stringify(obj)
+//       for (let locale of locales) {
+//         on(locale, () => {
+//
+//           locale.pushContext(obj)
+//         })
+//       }
+//       return this;
+//     },
+//     run: function (fn) {
+//       return on(locales[0]).run(fn)
+//     }
+//   }}
 
 function on(locale) {
   return {
-    run: function (fn) {
+    with: function (obj) {
+      locale.pushContext(obj)
+      return this;
+    },
+    do: function (fn) {
       return new Promise(function (resolve, reject) {
         try {
           locale.pushContext({
@@ -86,7 +102,7 @@ function on(locale) {
           })
           const code = "result = (" + fn.toString() + ")();"
           var script = new vm.Script(code);
-          script.runInNewContext(locale.currentContext());
+          script.runInNewContext(locale.context());
           resolve(locale.popContext().result)
         } catch (err) {
           locale.popContext()
@@ -137,7 +153,7 @@ var DistArray = function (domain) {
   const objId = uuid.v4()
 
   for (var i = 0; i < domain.locales.length; i++) {
-    domain.locales[i].currentContext()[objId] = {}
+    domain.locales[i].context()[objId] = {}
   }
 
   return {
@@ -145,10 +161,10 @@ var DistArray = function (domain) {
     get: function (x) {
       // on(domain.get(x))
       //   .run(() => )
-      return domain.get(x).currentContext()[objId][x] || 0
+      return domain.get(x).context()[objId][x] || 0
     },
     put: function (x, v) {
-      domain.get(x).currentContext()[objId][x] = v
+      domain.get(x).context()[objId][x] = v
         // on(domain[x]).run(() => this[objId] = v)
     },
     set: function (v) {
@@ -167,9 +183,46 @@ var DistArray = function (domain) {
   }
 }
 
+function loadConfig() {
+  const localeConfig = {
+    1: {
+      url: "http://localhost:3001"
+    },
+    2: {
+      url: "http://localhost:3002"
+    }
+  }
+
+  return Promise.resolve(localeConfig)
+}
+
+function init() {
+  return loadConfig()
+    .then((config) => {
+      var Locales = []
+
+      // create two locales living on the same host (and same process)
+      var context1 = createChildContext(BaseContext)
+      var locale1 = new Locale(1, context1)
+      locale1.context().here = locale1
+
+      var context2 = createChildContext(BaseContext)
+      var locale2 = new Locale(2, context2)
+      locale2.context().here = locale2
+
+      locale1.context().Locales = [locale1, locale2]
+      locale2.context().Locales = [locale1, locale2]
+
+      Locales.push(locale1)
+      Locales.push(locale2)
+
+      return Locales
+    })
+}
+
 module.exports = {
   Locale: Locale,
-  Locales: Locales,
+  init: init,
   on: on,
   Domain: Domain,
   DistArray: DistArray,

@@ -4,6 +4,7 @@
   "description": "distributed computing experiment based on Chapel",
   "main": "index.js",
   "dependencies": {
+    "asyncawait": "^1.0.6",
     "uuid": "^2.0.3"
   },
   "devDependencies": {},
