@@ -1,5 +1,8 @@
 'use strict';
 
+var async = require('asyncawait/async');
+var await = require('asyncawait/await');
+
 var uuid = require('uuid')
 var vm = require('vm');
 
@@ -201,26 +204,37 @@ function init() {
     .then((config) => {
       var Locales = []
 
-      // create two locales living on the same host (and same process)
-      var context1 = createChildContext(BaseContext)
-      var locale1 = new Locale(1, context1)
-      locale1.context().here = locale1
+      // create "local" locales living on the same host (and same process)
+      for (let i of [1,2,3]) {
+        let context = createChildContext(BaseContext)
+        let locale = new Locale(i, context)
+        locale.context().here = locale
+        Locales.push(locale)
+      }
 
-      var context2 = createChildContext(BaseContext)
-      var locale2 = new Locale(2, context2)
-      locale2.context().here = locale2
+      for (let locale of Locales) {
+        locale.context().Locales = Locales
+      }
 
-      locale1.context().Locales = [locale1, locale2]
-      locale2.context().Locales = [locale1, locale2]
-
-      Locales.push(locale1)
-      Locales.push(locale2)
-
-      return Locales
+      return {
+        here: Locales[0],
+        Locales: Locales
+      }
     })
 }
 
+function run(fn) {
+  async(function () {
+    await (init()
+      .then(fn)
+      .catch((err) => {
+        console.log("failed: ", err);
+      }))
+  })();
+}
+
 module.exports = {
+  run: run,
   Locale: Locale,
   init: init,
   on: on,

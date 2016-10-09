@@ -6,44 +6,74 @@ var Domain = parallac.Domain
 var DistArray = parallac.DistArray
 var DistArrayIterator = parallac.DistArrayIterator
 
-on(Locales[0])
-  .with({
-    a: 1
-  })
-  .do(() => {
-    function nop() {};
-    var i = 1000000;
-    while (i--) {
-      nop();
-    }
-    console.log(a)
-    a += 1
-    console.log(a)
-  })
-  .catch((err) => console.log(err))
+function testHere(config) {
+  on(config.here)
+    .do(() => {
+      console.log("hello from locale", here.id)
+    })
+}
 
-on(Locales[0])
-  .with({
-    b: 8
-  })
-  .do(() => b * 2)
-  .then((result) => console.log("result", result))
-  .catch((err) => console.log(err))
-
-var d = new Domain(Locales, 2)
-var da = new DistArray(d)
-
-var it = {
-  [Symbol.iterator]() {
-    return DistArrayIterator(da)
+function testHereIds(config) {
+  for (let locale of config.Locales) {
+    on(locale)
+      .do(() => {
+        console.log("hello from locale", here.id)
+      })
   }
-};
-for (let v of it) {
-  console.log("v", v)
 }
-console.log("da: ", da.toString())
-da.put(0, 5)
-for (let v of it) {
-  console.log("v", v)
+
+function testContextUpdate(config) {
+  on(config.here)
+    .with({
+      a: 1
+    })
+    .do(() => {
+      function nop() {};
+      var i = 1000000;
+      while (i--) {
+        nop();
+      }
+      console.log(a)
+      a += 1
+      console.log(a)
+    })
+    .catch((err) => console.log(err))
 }
-console.log("da: ", da.toString())
+
+function testReturningResult(config) {
+  on(config.here)
+    .with({
+      b: 8
+    })
+    .do(() => b * 2)
+    .then((result) => console.log("result", result))
+    .catch((err) => console.log(err))
+}
+
+function testDistArray(config) {
+  var d = new Domain(config.Locales, 2)
+  var da = new DistArray(d)
+
+  var it = {
+    [Symbol.iterator]() {
+      return DistArrayIterator(da)
+    }
+  };
+  for (let v of it) {
+    console.log("v", v)
+  }
+  console.log("da: ", da.toString())
+  da.put(0, 5)
+  for (let v of it) {
+    console.log("v", v)
+  }
+  console.log("da: ", da.toString())
+}
+
+parallac.run((config) => {
+  testHere(config)
+  testHereIds(config)
+  testContextUpdate(config)
+  testReturningResult(config)
+  testDistArray(config)
+})
