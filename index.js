@@ -50,7 +50,7 @@ function testReturningResult(config) {
     .catch((err) => console.log(err))
 }
 
-function testDistArray(config) {
+function testDistArrayIterator(config) {
   var d = new Domain(config.Locales, 2)
   var da = new DistArray(d)
 
@@ -75,5 +75,5 @@ parallac.run((config) => {
   testHereIds(config)
   testContextUpdate(config)
   testReturningResult(config)
-  testDistArray(config)
+  testDistArrayIterator(config)
 })
