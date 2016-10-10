@@ -27,10 +27,7 @@ parallac.run(() => {
   console.log()
   console.log("test: hello from each locale")
   for (let locale of Locales) {
-    on(locale)
-      .do(() => {
-        console.log("hello from locale", here.id)
-      })
+    on(locale).do(() => console.log("hello from locale", here.id))
   }
 })
 
