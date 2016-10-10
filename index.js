@@ -1,29 +1,43 @@
 'use strict';
 
 var parallac = require('./parallac')
-var on = parallac.on
-var Domain = parallac.Domain
-var DistArray = parallac.DistArray
-var DistArrayIterator = parallac.DistArrayIterator
 
-function testHere(config) {
-  on(config.here)
-    .do(() => {
-      console.log("hello from locale", here.id)
-    })
-}
+// parallac.init()
+//   .then((globalConfig) => {
+//     let SessionManager = parallac.SessionManager
+//     let session = new SessionManager(globalConfig)
+//     return session
+//       .do(() => {
+//         for (let locale of Locales) {
+//           on(locale)
+//             .do(() => {
+//               console.log("hello from locale", here.id)
+//             })
+//         }
+//       })
+//   })
 
-function testHereIds(config) {
-  for (let locale of config.Locales) {
+parallac.run(() => {
+  console.log()
+  console.log("test: hello from locale 0")
+  console.log("hello from locale", here.id)
+})
+
+parallac.run(() => {
+  console.log()
+  console.log("test: hello from each locale")
+  for (let locale of Locales) {
     on(locale)
       .do(() => {
         console.log("hello from locale", here.id)
       })
   }
-}
+})
 
-function testContextUpdate(config) {
-  on(config.here)
+parallac.run(() => {
+  console.log()
+  console.log("test: hello from each locale")
+  on(here)
     .with({
       a: 1
     })
@@ -38,20 +52,23 @@ function testContextUpdate(config) {
       console.log(a)
     })
     .catch((err) => console.log(err))
-}
+})
 
-function testReturningResult(config) {
-  on(config.here)
+parallac.run(() => {
+  console.log()
+  console.log("test: return result")
+  return on(here)
     .with({
       b: 8
     })
     .do(() => b * 2)
-    .then((result) => console.log("result", result))
-    .catch((err) => console.log(err))
-}
+    .then((result) => console.log("8 * 2 = ", result))
+})
 
-function testDistArrayIterator(config) {
-  var d = new Domain(config.Locales, 2)
+parallac.run(() => {
+  console.log()
+  console.log("test: DistArray iterator")
+  var d = new Domain(Locales, 2)
   var da = new DistArray(d)
 
   var it = {
@@ -68,12 +85,4 @@ function testDistArrayIterator(config) {
     console.log("v", v)
   }
   console.log("da: ", da.toString())
-}
-
-parallac.run((config) => {
-  testHere(config)
-  testHereIds(config)
-  testContextUpdate(config)
-  testReturningResult(config)
-  testDistArrayIterator(config)
 })

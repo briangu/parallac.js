@@ -209,6 +209,10 @@ function init() {
         let context = createChildContext(BaseContext)
         let locale = new Locale(i, context)
         locale.context().here = locale
+        locale.context().on = on
+        locale.context().Domain = Domain
+        locale.context().DistArray = DistArray
+        locale.context().DistArrayIterator = DistArrayIterator
         Locales.push(locale)
       }
 
@@ -226,19 +230,14 @@ function init() {
 function run(fn) {
   async(function () {
     await (init()
-      .then(fn)
+      .then((config) => on(config.Locales[0]).do(fn))
       .catch((err) => {
-        console.log("failed: ", err);
+        console.log("run failed: ", err);
       }))
   })();
 }
 
 module.exports = {
   run: run,
-  Locale: Locale,
-  init: init,
-  on: on,
-  Domain: Domain,
-  DistArray: DistArray,
-  DistArrayIterator: DistArrayIterator
+  init: init
 }
