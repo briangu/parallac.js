@@ -52,16 +52,16 @@ run(() => {
     .catch((err) => writeln(err))
 })
 
-run(() => {
-  writeln()
-  writeln("test: return result")
-  on(here)
-    .with({
-      b: 8
-    })
-    .do(() => b * 2)
-    .then((result) => writeln("8 * 2 = ", result))
-})
+// run(() => {
+//   writeln()
+//   writeln("test: return result")
+//   on(here)
+//     .with({
+//       b: 8
+//     })
+//     .do(() => b * 2)
+//     .then((result) => writeln("8 * 2 = ", result))
+// })
 
 run(() => {
   writeln()
@@ -69,31 +69,33 @@ run(() => {
   var d = new Domain(Locales, 2)
   var da = new DistArray(d)
 
-  var it = {
-    [Symbol.iterator]() {
-      return DistArrayIterator(da)
-    }
-  };
-  for (let v of it) {
-    writeln("v", v)
-  }
+  // var it = {
+  //   [Symbol.iterator]() {
+  //     return DistArrayIterator(da)
+  //   }
+  // };
+  // for (let v of it) {
+  //   writeln("v", v)
+  // }
   writeln("da: ", da.toString())
   da.put(0, 5)
-  for (let v of it) {
-    writeln("v", v)
-  }
+  // for (let v of it) {
+  //   writeln("v", v)
+  // }
   writeln("da: ", da.toString())
 })
 
-// run(() => {
-//   let d = new Domain(Locales, 16)
-//   let a = new DistArray(d)
-//   let b = new DistArray(d)
-//   let c = new DistArray(d)
-//   a.set(1) // set all values to 1 across all locales
-//   b.set(2) // set all values to 2 across all locales
-//   c.forAll((i) => a.get(i) + b.get(i)) // on each locale, assign the sum of a + b to c
-//   writeln(a.toString())
-//   writeln(b.toString())
-//   writeln(c.toString())
-// })
+run(() => {
+  writeln()
+  writeln("test: vector addition")
+  let d = new Domain(Locales, 16)
+  let a = new DistArray(d)
+  let b = new DistArray(d)
+  let c = new DistArray(d)
+  a.set(1) // set all values to 1 across all locales
+  // b.set(2) // set all values to 2 across all locales
+  // c.forAll((i) => a.get(i) + b.get(i)) // on each locale, assign the sum of a + b to c
+  writeln(a.toString())
+  // writeln(b.toString())
+  // writeln(c.toString())
+})

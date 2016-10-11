@@ -104,6 +104,7 @@ function on(locale) {
             result: undefined
           })
           const code = "result = (" + fn.toString() + ")();"
+          // TODO: can we cache?
           var script = new vm.Script(code);
           script.runInNewContext(locale.context());
           resolve(locale.popContext().result)
@@ -117,6 +118,7 @@ function on(locale) {
 }
 
 // simple 1-D domain
+// TODO: use bracket [] notation if possible
 var Domain = function (locales, len) {
   const domain = []
 
@@ -136,11 +138,11 @@ var Domain = function (locales, len) {
 
 function DistArrayIterator(da) {
   return {
-    next() {
+    next: function() {
       if (this._idx < da.length) {
         return {
           value: da.get(this._idx++)
-        };
+        }
       } else {
         return {
           done: true
@@ -155,31 +157,47 @@ var DistArray = function (domain) {
   const values = {}
   const objId = uuid.v4()
 
-  for (var i = 0; i < domain.locales.length; i++) {
-    domain.locales[i].context()[objId] = {}
+  for (let locale of domain.locales) {
+    locale.context()._sys[objId] = {}
   }
 
   return {
     length: domain.length,
-    get: function (x) {
-      // on(domain.get(x))
-      //   .run(() => )
-      return domain.get(x).context()[objId][x] || 0
+    get: function (i) {
+      return on(domain.get(i))
+        .with({
+          i: i,
+          objId: objId
+        })
+        .do(() => _sys[objId][i] || 0)
     },
-    put: function (x, v) {
-      domain.get(x).context()[objId][x] = v
-        // on(domain[x]).run(() => this[objId] = v)
+    put: function (i, v) {
+      return on(domain.get(i))
+        .with({
+          i: i,
+          v: v,
+          objId: objId
+        })
+        .do(() => {
+          _sys[objId][i] = v
+        })
     },
     set: function (v) {
-
-    },
-    toString: function () {
-      var s = []
-      for (let v of this) {
-        s.push(v)
+      var calls = []
+      for (let i = 0; i < domain.length; i++) {
+        calls.push(this.put(i, v))
       }
-      return s.join(",")
+      return Promise.all(calls)
     },
+    toString: async (function () {
+      var calls = []
+      for (let v of this) {
+        calls.push(v)
+      }
+      var p = Promise.all(calls).then((results) => results.join(","))
+      var r = await (p)
+      return r;
+    }),
     [Symbol.iterator]: function () {
       return DistArrayIterator(this)
     }
@@ -205,7 +223,7 @@ function init() {
       var Locales = []
 
       // create "local" locales living on the same host (and same process)
-      for (let i of [1,2,3]) {
+      for (let i of[1, 2, 3]) {
         let context = createChildContext(BaseContext)
         let locale = new Locale(i, context)
         locale.context().here = locale
@@ -214,6 +232,8 @@ function init() {
         locale.context().DistArray = DistArray
         locale.context().DistArrayIterator = DistArrayIterator
         locale.context().writeln = console.log
+        locale.context()._sys = {}
+
         Locales.push(locale)
       }
 
