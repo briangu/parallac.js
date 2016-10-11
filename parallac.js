@@ -213,6 +213,7 @@ function init() {
         locale.context().Domain = Domain
         locale.context().DistArray = DistArray
         locale.context().DistArrayIterator = DistArrayIterator
+        locale.context().writeln = console.log
         Locales.push(locale)
       }
 
@@ -239,5 +240,6 @@ function run(fn) {
 
 module.exports = {
   run: run,
-  init: init
+  init: init,
+  writeln: console.log
 }

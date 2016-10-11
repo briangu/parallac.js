@@ -1,6 +1,7 @@
 'use strict';
 
 var parallac = require('./parallac')
+var run = parallac.run
 
 // parallac.init()
 //   .then((globalConfig) => {
@@ -11,29 +12,29 @@ var parallac = require('./parallac')
 //         for (let locale of Locales) {
 //           on(locale)
 //             .do(() => {
-//               console.log("hello from locale", here.id)
+//               writeln("hello from locale", here.id)
 //             })
 //         }
 //       })
 //   })
 
-parallac.run(() => {
-  console.log()
-  console.log("test: hello from locale 0")
-  console.log("hello from locale", here.id)
+run(() => {
+  writeln()
+  writeln("test: hello from locale 0")
+  writeln("hello from locale", here.id)
 })
 
-parallac.run(() => {
-  console.log()
-  console.log("test: hello from each locale")
+run(() => {
+  writeln()
+  writeln("test: hello from each locale")
   for (let locale of Locales) {
-    on(locale).do(() => console.log("hello from locale", here.id))
+    on(locale).do(() => writeln("hello from locale", here.id))
   }
 })
 
-parallac.run(() => {
-  console.log()
-  console.log("test: hello from each locale")
+run(() => {
+  writeln()
+  writeln("test: hello from each locale")
   on(here)
     .with({
       a: 1
@@ -44,27 +45,27 @@ parallac.run(() => {
       while (i--) {
         nop();
       }
-      console.log(a)
+      writeln(a)
       a += 1
-      console.log(a)
+      writeln(a)
     })
-    .catch((err) => console.log(err))
+    .catch((err) => writeln(err))
 })
 
-parallac.run(() => {
-  console.log()
-  console.log("test: return result")
-  return on(here)
+run(() => {
+  writeln()
+  writeln("test: return result")
+  on(here)
     .with({
       b: 8
     })
     .do(() => b * 2)
-    .then((result) => console.log("8 * 2 = ", result))
+    .then((result) => writeln("8 * 2 = ", result))
 })
 
-parallac.run(() => {
-  console.log()
-  console.log("test: DistArray iterator")
+run(() => {
+  writeln()
+  writeln("test: DistArray iterator")
   var d = new Domain(Locales, 2)
   var da = new DistArray(d)
 
@@ -74,12 +75,25 @@ parallac.run(() => {
     }
   };
   for (let v of it) {
-    console.log("v", v)
+    writeln("v", v)
   }
-  console.log("da: ", da.toString())
+  writeln("da: ", da.toString())
   da.put(0, 5)
   for (let v of it) {
-    console.log("v", v)
+    writeln("v", v)
   }
-  console.log("da: ", da.toString())
+  writeln("da: ", da.toString())
 })
+
+// run(() => {
+//   let d = new Domain(Locales, 16)
+//   let a = new DistArray(d)
+//   let b = new DistArray(d)
+//   let c = new DistArray(d)
+//   a.set(1) // set all values to 1 across all locales
+//   b.set(2) // set all values to 2 across all locales
+//   c.forAll((i) => a.get(i) + b.get(i)) // on each locale, assign the sum of a + b to c
+//   writeln(a.toString())
+//   writeln(b.toString())
+//   writeln(c.toString())
+// })
