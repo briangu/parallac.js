@@ -52,54 +52,52 @@ run(() => {
     .catch((err) => writeln(err))
 })
 
-// run(() => {
-//   writeln()
-//   writeln("test: return result")
-//   on(here)
-//     .with({
-//       b: 8
-//     })
-//     .do(() => b * 2)
-//     .then((result) => writeln("8 * 2 = ", result))
-// })
+run(() => {
+  writeln()
+  writeln("test: return result")
+  on(here)
+    .with({
+      b: 8
+    })
+    .do(() => b * 2)
+    .then((result) => writeln("8 * 2 = ", result))
+})
 
-// run(() => {
-//   writeln()
-//   writeln("test: DistArray iterator")
-//   var d = new Domain(Locales, 2)
-//   var da = new DistArray(d)
+run(() => {
+  writeln()
+  writeln("test: DistArray iterator")
 
-//   // var it = {
-//   //   [Symbol.iterator]() {
-//   //     return DistArrayIterator(da)
-//   //   }
-//   // };
-//   // for (let v of it) {
-//   //   writeln("v", v)
-//   // }
-//   writeln("da: ", da.toString())
-//   da.put(0, 5)
-//     // for (let v of it) {
-//     //   writeln("v", v)
-//     // }
-//   writeln("da: ", da.toString())
-// })
+  return createDomain(Locales, 2)
+    .then((d) => {
+      var calls = []
+      calls.push(Promise.resolve(d))
+      calls.push(createDistArray(d))
+      return Promise.all(calls)
+    })
+    .then((varr) => {
+      const d = varr[0]
+      const a = varr[1]
 
-  /*
+      a.getAll().then((all) => writeln("a: ", all))
+      a.put(0, 5)
+      a.getAll().then((all) => writeln("a: ", all))
+    })
+})
 
-  "assembly language" version of:
+/*
 
-  let d = domain(Locales, 16)
-  let a = DistArray(d)
-  let b = DistArray(d)
-  let c = DistArray(d)
+"assembly language" version of:
 
-  a = 1
-  b = 2
-  c = a + b
+let d = domain(Locales, 16)
+let a = DistArray(d)
+let b = DistArray(d)
+let c = DistArray(d)
 
-  */
-  
+a = 1
+b = 2
+c = a + b
+
+*/
 run(() => {
   writeln()
   writeln("test: vector addition")
