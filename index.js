@@ -79,7 +79,7 @@ run(() => {
       const a = varr[1]
 
       a.getAll().then((all) => writeln("a: ", all))
-      a.put(0, 5)
+      a.set(0, 5)
       a.getAll().then((all) => writeln("a: ", all))
     })
 })
@@ -117,8 +117,8 @@ run(() => {
       const b = varr[2]
       const c = varr[3]
 
-      return a.set(1)
-        .then(() => b.set(2))
+      return a.setAll(1)
+        .then(() => b.forAll(d).set((i) => i))
         .then(() => c.zip(a,b).set((x,y) => x + y))
         .then(() => a.getAll().then(writeln))
         .then(() => b.getAll().then(writeln))

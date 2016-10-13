@@ -197,7 +197,6 @@ var DistArray = function (domain) {
     length: domain.length,
     init: init,
     get: function (i) {
-      // console.log(this.domain)
       return on(this.domain.get(i))
         .with({
           i: i,
@@ -205,10 +204,7 @@ var DistArray = function (domain) {
         })
         .do(() => _sys[objId][i] || 0)
     },
-    localGet: function (i) {
-      return _sys[objId][i] || 0
-    },
-    put: function (i, v) {
+    set: function (i, v) {
       return on(this.domain.get(i))
         .with({
           i: i,
@@ -218,6 +214,45 @@ var DistArray = function (domain) {
         .do(() => {
           _sys[objId][i] = v
         })
+    },
+    map: function (r) {
+      return {
+        set: function(fn) {
+          const calls = []
+          for (let i of r) {
+            calls.push(on(dom.get(i))
+              .with({
+                asym: asym,
+                fn: fn,
+                i: i
+              })
+              .do(() => {
+                let av = here.context()._sys[asym][i]
+                here.context()._sys[csym][i] = fn(av)
+              }))
+          }
+          return Promise.all(calls)
+        }
+      }
+    },
+    forAll: function (dom) {
+      return {
+        set: function(fn) {
+          const calls = []
+          for (let i = 0; i < dom.length; i++) {
+            calls.push(on(dom.get(i))
+              .with({
+                sym: objId,
+                fn: fn,
+                i: i
+              })
+              .do(() => {
+                here.context()._sys[sym][i] = fn(i)
+              }))
+          }
+          return Promise.all(calls)
+        }
+      }
     },
     zip: function (a, b) {
       if (a.domain.length !== b.domain.length) {
@@ -248,10 +283,10 @@ var DistArray = function (domain) {
         }
       }
     },
-    set: function (v) {
+    setAll: function (v) {
       var calls = []
       for (let i = 0; i < domain.length; i++) {
-        calls.push(this.put(i, v))
+        calls.push(this.set(i, v))
       }
       return Promise.all(calls)
     },
@@ -262,13 +297,6 @@ var DistArray = function (domain) {
       }
       return Promise.all(calls)
         .then((results) => results.join(","))
-    },
-    forAll: function(fn) {
-      var calls = []
-      for (let i = 0; i < domain.length; i++) {
-        calls.push(on(this.domain.get(i)).do(fn))
-      }
-      return Promise.all(calls)
     },
     [Symbol.iterator]: function () {
       return DistArrayIterator(this)
