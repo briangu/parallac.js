@@ -138,6 +138,7 @@ var Domain = function (locales, len) {
 
   return {
     domain: [],
+    locales: locales,
     length: len,
     init: function () {
       // console.log("domain init")
@@ -152,10 +153,11 @@ var Domain = function (locales, len) {
       })
     },
     get: function (x) {
-      // console.log("get", x, this.domain)
       return this.domain[x]
     },
-    locales: locales
+    [Symbol.iterator]: function () {
+      return DistArrayIterator(this)
+    }
   }
 }
 
@@ -190,6 +192,7 @@ var DistArray = function (domain) {
   }
 
   return {
+    objId: objId,
     domain: domain,
     length: domain.length,
     init: init,
@@ -206,10 +209,6 @@ var DistArray = function (domain) {
       return _sys[objId][i] || 0
     },
     put: function (i, v) {
-      // console.log(i)
-      // console.log(domain)
-      // console.log(domain.domain)
-      // console.log(this.domain.get(i))
       return on(this.domain.get(i))
         .with({
           i: i,
@@ -219,6 +218,35 @@ var DistArray = function (domain) {
         .do(() => {
           _sys[objId][i] = v
         })
+    },
+    zip: function (a, b) {
+      if (a.domain.length !== b.domain.length) {
+        throw "domains are not equal: " + a.domain.length + " !== " + b.domain.length
+      }
+      const dom = a.domain
+      const asym = a.objId
+      const bsym = b.objId
+      return {
+        set: function(fn) {
+          const calls = []
+          for (let i = 0; i < dom.length; i++) {
+            calls.push(on(dom.get(i))
+              .with({
+                asym: asym,
+                bsym: bsym,
+                csym: objId,
+                fn: fn,
+                i: i
+              })
+              .do(() => {
+                let av = here.context()._sys[asym][i]
+                let bv = here.context()._sys[bsym][i]
+                here.context()._sys[csym][i] = fn(av,bv)
+              }))
+          }
+          return Promise.all(calls)
+        }
+      }
     },
     set: function (v) {
       var calls = []

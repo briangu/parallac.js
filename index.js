@@ -121,7 +121,7 @@ run(() => {
 
       return a.set(1)
         .then(() => b.set(2))
-        .then(() => c.set(zip(a,b).do((x,y) => x + y)))
+        .then(() => c.zip(a,b).set((x,y) => x + y))
         .then(() => a.getAll().then(writeln))
         .then(() => b.getAll().then(writeln))
         .then(() => c.getAll().then(writeln))
