@@ -120,17 +120,40 @@ function on(locale) {
 // simple 1-D domain
 // TODO: use bracket [] notation if possible
 var Domain = function (locales, len) {
-  const domain = []
+  // const domain = []
 
   // TODO: add ability to specify domain contents
-  for (var i = 0; i < len; i++) {
-    domain.push(locales[i % locales.length])
-  }
+
+  // function init() {
+  //   console.log("domain init")
+  //   const k = this
+  //   return new Promise(function(resolve, reject) {
+  //     for (var i = 0; i < len; i++) {
+  //       domain.push(locales[i % locales.length])
+  //     }
+  //     console.log("domain:domain",domain)
+  //     resolve(k)
+  //   })
+  // }
 
   return {
-    length: domain.length,
+    domain: [],
+    length: len,
+    init: function () {
+      // console.log("domain init")
+      const k = this
+      const d = this.domain
+      return new Promise(function(resolve, reject) {
+        for (var i = 0; i < len; i++) {
+          d.push(locales[i % locales.length])
+        }
+        // console.log("domain:domain", k.domain)
+        resolve(k)
+      })
+    },
     get: function (x) {
-      return domain[x]
+      // console.log("get", x, this.domain)
+      return this.domain[x]
     },
     locales: locales
   }
@@ -154,25 +177,40 @@ function DistArrayIterator(da) {
 }
 
 var DistArray = function (domain) {
-  const values = {}
   const objId = uuid.v4()
 
-  for (let locale of domain.locales) {
-    locale.context()._sys[objId] = {}
+  function init() {
+    const k = this
+    return new Promise(function(resolve, reject) {
+      for (let locale of domain.locales) {
+        locale.context()._sys[objId] = {}
+      }
+      resolve(k)
+    })
   }
 
   return {
+    domain: domain,
     length: domain.length,
+    init: init,
     get: function (i) {
-      return on(domain.get(i))
+      // console.log(this.domain)
+      return on(this.domain.get(i))
         .with({
           i: i,
           objId: objId
         })
         .do(() => _sys[objId][i] || 0)
     },
+    localGet: function (i) {
+      return _sys[objId][i] || 0
+    },
     put: function (i, v) {
-      return on(domain.get(i))
+      // console.log(i)
+      // console.log(domain)
+      // console.log(domain.domain)
+      // console.log(this.domain.get(i))
+      return on(this.domain.get(i))
         .with({
           i: i,
           v: v,
@@ -189,15 +227,21 @@ var DistArray = function (domain) {
       }
       return Promise.all(calls)
     },
-    toString: async (function () {
+    getAll: function () {
       var calls = []
       for (let v of this) {
         calls.push(v)
       }
-      var p = Promise.all(calls).then((results) => results.join(","))
-      var r = await (p)
-      return r;
-    }),
+      return Promise.all(calls)
+        .then((results) => results.join(","))
+    },
+    forAll: function(fn) {
+      var calls = []
+      for (let i = 0; i < domain.length; i++) {
+        calls.push(on(this.domain.get(i)).do(fn))
+      }
+      return Promise.all(calls)
+    },
     [Symbol.iterator]: function () {
       return DistArrayIterator(this)
     }
@@ -217,6 +261,16 @@ function loadConfig() {
   return Promise.resolve(localeConfig)
 }
 
+function createDomain(locales, len) {
+  var d = new Domain(locales, len)
+  return d.init()
+}
+
+function createDistArray(dom) {
+  var d = new DistArray(dom)
+  return d.init()
+}
+
 function init() {
   return loadConfig()
     .then((config) => {
@@ -230,9 +284,10 @@ function init() {
         locale.context().on = on
         locale.context().Domain = Domain
         locale.context().DistArray = DistArray
-        locale.context().DistArrayIterator = DistArrayIterator
+        locale.context().createDomain = createDomain
+        locale.context().createDistArray = createDistArray
         locale.context().writeln = console.log
-        locale.context()._sys = {}
+        locale.context()._sys = {} // TODO: do we need this?
 
         Locales.push(locale)
       }
