@@ -39,7 +39,7 @@ describe("test DistArray", function () {
     return run(() => {
         return createDomain(Locales, 16)
           .then((d) => {
-            var calls = []
+            let calls = []
             calls.push(Promise.resolve(d))
             calls.push(createDistArray(d))
             calls.push(createDistArray(d))
@@ -52,9 +52,11 @@ describe("test DistArray", function () {
             const b = varr[2]
             const c = varr[3]
 
-            return Promise.resolve()
-              .then(() => a.setAll(1))
-              .then(() => b.setAll(2))
+            let calls = []
+            calls.push(a.setAll(1))
+            calls.push(b.setAll(2))
+
+            return Promise.all(calls)
               .then(() => c.zip(a, b).set((x, y) => x + y))
               .then(() => c.getAll())
           })
@@ -66,7 +68,7 @@ describe("test DistArray", function () {
     return run(() => {
         return createDomain(Locales, 16)
           .then((d) => {
-            var calls = []
+            let calls = []
             calls.push(Promise.resolve(d))
             calls.push(createDistArray(d))
             calls.push(createDistArray(d))
@@ -79,10 +81,12 @@ describe("test DistArray", function () {
             const b = varr[2]
             const c = varr[3]
 
+            let calls = []
+            calls.push(a.setAll(1))
+            calls.push(b.forAll().set((i) => i)) // ensure each locale has different values
+
             // TODO: test forAll puts the right values on the right locales
-            return Promise.resolve()
-              .then(() => a.setAll(1))
-              .then(() => b.forAll().set((i) => i)) // ensure each locale has different values
+            return Promise.all(calls)
               .then(() => c.zip(a, b).set((x, y) => x + y))
               .then(() => c.getAll())
           })
