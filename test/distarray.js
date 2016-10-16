@@ -9,17 +9,13 @@ describe("test DistArray", function () {
   it("test DistArray iterator", function () {
     return run(() => {
         var assert = require('assert')
-
         return createDomain(Locales, 2)
           .then((d) => createDistArray(d))
           .then((a) => a.getAll().then((all) => {
             assert([0, 0], all)
             return a
           }))
-          .then((a) => {
-            a.set(0, 5)
-            return a
-          })
+          .then((a) => a.set(0, 5))
           .then((a) => a.getAll())
       })
       .should.eventually.deep.equal([5,0])
@@ -63,12 +59,10 @@ describe("test DistArray", function () {
               .then(() => a.setAll(1))
               .then(() => b.setAll(2))
               .then(() => c.zip(a, b).set((x, y) => x + y))
-              .then(() => a.getAll().then(writeln))
-              .then(() => b.getAll().then(writeln))
-              .then(() => c.getAll().then(writeln))
+              .then(() => c.getAll())
           })
       })
-      .should.be.fulfilled
+      .should.eventually.be.deep.equal([ 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3 ])
   })
 
   it("", function () {
@@ -95,12 +89,10 @@ describe("test DistArray", function () {
               .then(() => a.setAll(1))
               .then(() => b.forAll().set((i) => i))
               .then(() => c.zip(a, b).set((x, y) => x + y))
-              .then(() => a.getAll().then(writeln))
-              .then(() => b.getAll().then(writeln))
-              .then(() => c.getAll().then(writeln))
+              .then(() => c.getAll())
           })
       })
-      .should.be.fulfilled
+      .should.eventually.be.deep.equal([ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 ])
   })
 
   // it("", function () {

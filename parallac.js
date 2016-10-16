@@ -217,7 +217,7 @@ var DistArray = function (domain) {
         .do(() => {
           _sys[objId][i] = v
         })
-        // .then(() => this)
+        .then(() => this)
     },
     map: function (r) {
       return {
@@ -263,6 +263,7 @@ var DistArray = function (domain) {
       if (a.domain.length !== b.domain.length) {
         throw "domains are not equal: " + a.domain.length + " !== " + b.domain.length
       }
+      const kThis = this
       const dom = a.domain
       const asym = a.objId
       const bsym = b.objId
@@ -285,6 +286,7 @@ var DistArray = function (domain) {
               }))
           }
           return Promise.all(calls)
+            .then(() => kThis)
         }
       }
     },
@@ -294,6 +296,7 @@ var DistArray = function (domain) {
         calls.push(this.set(i, v))
       }
       return Promise.all(calls)
+        .then(() => this)
     },
     getAll: function () {
       var calls = []
