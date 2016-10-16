@@ -79,6 +79,7 @@ describe("test DistArray", function () {
             const b = varr[2]
             const c = varr[3]
 
+            // TODO: test forAll puts the right values on the right locales
             return Promise.resolve()
               .then(() => a.setAll(1))
               .then(() => b.forAll().set((i) => i)) // ensure each locale has different values
