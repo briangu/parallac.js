@@ -3,6 +3,16 @@
 var parallac = require('./parallac')
 var run = parallac.run
 
+function p(fn) {
+  return new Promise(function (resolve, reject) {
+    try {
+      resolve(fn())
+    } catch (err) {
+      reject(err)
+    }
+  })
+}
+
 // parallac.init()
 //   .then((globalConfig) => {
 //     let SessionManager = parallac.SessionManager
@@ -55,6 +65,7 @@ run(() => {
 run(() => {
   writeln()
   writeln("test: return result")
+
   on(here)
     .with({
       b: 8
@@ -78,9 +89,10 @@ run(() => {
       const d = varr[0]
       const a = varr[1]
 
-      a.getAll().then((all) => writeln("a: ", all))
-      a.set(0, 5)
-      a.getAll().then((all) => writeln("a: ", all))
+      return Promise.resolve()
+      .then(() => a.getAll().then((all) => writeln("a: ", all)))
+      .then(() => a.set(0, 5))
+      .then(() => a.getAll().then((all) => writeln("a: ", all)))
     })
 })
 
@@ -117,8 +129,38 @@ run(() => {
       const b = varr[2]
       const c = varr[3]
 
-      return a.setAll(1)
-        .then(() => b.forAll(d).set((i) => i))
+      return Promise.resolve()
+        .then(() => a.setAll(1))
+        .then(() => b.setAll(2))
+        .then(() => c.zip(a,b).set((x,y) => x + y))
+        .then(() => a.getAll().then(writeln))
+        .then(() => b.getAll().then(writeln))
+        .then(() => c.getAll().then(writeln))
+    })
+})
+
+run(() => {
+  writeln()
+  writeln("test: vector addition - test locales")
+
+  return createDomain(Locales, 16)
+    .then((d) => {
+      var calls = []
+      calls.push(Promise.resolve(d))
+      calls.push(createDistArray(d))
+      calls.push(createDistArray(d))
+      calls.push(createDistArray(d))
+      return Promise.all(calls)
+    })
+    .then((varr) => {
+      const d = varr[0]
+      const a = varr[1]
+      const b = varr[2]
+      const c = varr[3]
+
+      return Promise.resolve()
+        .then(() => a.setAll(1))
+        .then(() => b.forAll().set((i) => i))
         .then(() => c.zip(a,b).set((x,y) => x + y))
         .then(() => a.getAll().then(writeln))
         .then(() => b.getAll().then(writeln))

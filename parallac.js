@@ -100,16 +100,29 @@ function on(locale) {
     do: function (fn) {
       return new Promise(function (resolve, reject) {
         try {
-          locale.pushContext({
-            result: undefined
-          })
-          const code = "result = (" + fn.toString() + ")();"
+          const code = "(" + fn.toString() + ")();"
           // TODO: can we cache?
           var script = new vm.Script(code);
-          script.runInNewContext(locale.context());
-          resolve(locale.popContext().result)
+          var result = script.runInNewContext(locale.context())
+          let kindOf = Object.prototype.toString.call(result)
+          if (kindOf === "[object Promise]") {
+            console.log("is promise")
+            result
+              .then(resolve)
+              .catch(reject)
+              // .then((v) => {
+              //   console.log("resolve", v)
+              //   resolve(v)
+              // })
+              // .catch((err) => {
+              //   console.log("rejecting", err)
+              //   reject(err)
+              // })
+          } else {
+            console.log("is non-promise")
+            resolve(result)
+          }
         } catch (err) {
-          locale.popContext()
           reject(err);
         }
       })
@@ -236,6 +249,7 @@ var DistArray = function (domain) {
       }
     },
     forAll: function (dom) {
+      dom = dom || this.domain
       return {
         set: function(fn) {
           const calls = []
@@ -327,13 +341,23 @@ function createDistArray(dom) {
   return d.init()
 }
 
+function p(fn) {
+  return new Promise(function (resolve, reject) {
+    try {
+      resolve(fn())
+    } catch (err) {
+      reject(err)
+    }
+  })
+}
+
 function init() {
   return loadConfig()
     .then((config) => {
       var Locales = []
 
       // create "local" locales living on the same host (and same process)
-      for (let i of[1, 2, 3]) {
+      for (let i of[0, 1, 2]) {
         let context = createChildContext(BaseContext)
         let locale = new Locale(i, context)
         locale.context().here = locale
@@ -343,6 +367,7 @@ function init() {
         locale.context().createDomain = createDomain
         locale.context().createDistArray = createDistArray
         locale.context().writeln = console.log
+        locale.context().p = p
         locale.context()._sys = {} // TODO: do we need this?
 
         Locales.push(locale)
@@ -360,13 +385,22 @@ function init() {
 }
 
 function run(fn) {
-  async(function () {
-    await (init()
-      .then((config) => on(config.Locales[0]).do(fn))
-      .catch((err) => {
-        console.log("run failed: ", err);
-      }))
-  })();
+  // async(function () {
+  //   await (init()
+  //     .then((config) => on(config.Locales[0]).do(fn))
+  //     .catch((err) => {
+  //       console.log("run failed: ", err);
+  //     }))
+  // })();
+  return init()
+    .then((config) => {
+      return on(config.Locales[0])
+        .do(fn)
+        // .catch((err) => {
+        //   console.log("run failed: ", err);
+        //   throw err
+        // })
+    })
 }
 
 module.exports = {
