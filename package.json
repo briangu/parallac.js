@@ -5,6 +5,8 @@
   "main": "index.js",
   "dependencies": {
     "asyncawait": "^1.0.6",
+    "express": "^4.14.0",
+    "socket.io": "^1.5.0",
     "uuid": "^2.0.3"
   },
   "devDependencies": {

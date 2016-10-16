@@ -101,7 +101,7 @@ function on(locale) {
       return new Promise(function (resolve, reject) {
         try {
           const code = "(" + fn.toString() + ")();"
-          // TODO: can we cache?
+            // TODO: can we cache?
           var script = new vm.Script(code);
           var result = script.runInNewContext(locale.context())
           let kindOf = Object.prototype.toString.call(result)
@@ -147,7 +147,7 @@ var Domain = function (locales, len) {
       // console.log("domain init")
       const k = this
       const d = this.domain
-      return new Promise(function(resolve, reject) {
+      return new Promise(function (resolve, reject) {
         for (var i = 0; i < len; i++) {
           d.push(locales[i % locales.length])
         }
@@ -166,7 +166,7 @@ var Domain = function (locales, len) {
 
 function DistArrayIterator(da) {
   return {
-    next: function() {
+    next: function () {
       if (this._idx < da.length) {
         return {
           value: da.get(this._idx++)
@@ -186,7 +186,7 @@ var DistArray = function (domain) {
 
   function init() {
     const k = this
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
       for (let locale of domain.locales) {
         locale.context()._sys[objId] = {}
       }
@@ -221,7 +221,7 @@ var DistArray = function (domain) {
     },
     map: function (r) {
       return {
-        set: function(fn) {
+        set: function (fn) {
           const calls = []
           for (let i of r) {
             calls.push(on(dom.get(i))
@@ -242,7 +242,7 @@ var DistArray = function (domain) {
     forAll: function (dom) {
       dom = dom || this.domain
       return {
-        set: function(fn) {
+        set: function (fn) {
           const calls = []
           for (let i = 0; i < dom.length; i++) {
             calls.push(on(dom.get(i))
@@ -268,7 +268,7 @@ var DistArray = function (domain) {
       const asym = a.objId
       const bsym = b.objId
       return {
-        set: function(fn) {
+        set: function (fn) {
           const calls = []
           for (let i = 0; i < dom.length; i++) {
             calls.push(on(dom.get(i))
@@ -282,7 +282,7 @@ var DistArray = function (domain) {
               .do(() => {
                 let av = here.context()._sys[asym][i]
                 let bv = here.context()._sys[bsym][i]
-                here.context()._sys[csym][i] = fn(av,bv)
+                here.context()._sys[csym][i] = fn(av, bv)
               }))
           }
           return Promise.all(calls)
@@ -313,12 +313,15 @@ var DistArray = function (domain) {
 
 function loadConfig() {
   const localeConfig = {
-    1: {
+    hosts: [{
       url: "http://localhost:3001"
-    },
-    2: {
+    }, {
       url: "http://localhost:3002"
-    }
+    }, {
+      url: "http://localhost:3003"
+    }, {
+      url: "http://localhost:3004"
+    }]
   }
 
   return Promise.resolve(localeConfig)
@@ -350,7 +353,7 @@ function init() {
       var Locales = []
 
       // create "local" locales living on the same host (and same process)
-      for (let i of[0, 1, 2]) {
+      for (let i = 0; i < config.hosts.length; i++) {
         let context = createChildContext(BaseContext)
         let locale = new Locale(i, context)
         locale.context().here = locale
