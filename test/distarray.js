@@ -6,29 +6,23 @@ chai.use(chaiAsPromised);
 var run = require('../parallac').run
 
 describe("test DistArray", function () {
-  it("", function () {
+  it("test DistArray iterator", function () {
     return run(() => {
-        writeln()
-        writeln("test: DistArray iterator")
+        var assert = require('assert')
 
         return createDomain(Locales, 2)
-          .then((d) => {
-            var calls = []
-            calls.push(Promise.resolve(d))
-            calls.push(createDistArray(d))
-            return Promise.all(calls)
+          .then((d) => createDistArray(d))
+          .then((a) => a.getAll().then((all) => {
+            assert([0, 0], all)
+            return a
+          }))
+          .then((a) => {
+            a.set(0, 5)
+            return a
           })
-          .then((varr) => {
-            const d = varr[0]
-            const a = varr[1]
-
-            return Promise.resolve()
-              .then(() => a.getAll().then((all) => writeln("a: ", all)))
-              .then(() => a.set(0, 5))
-              .then(() => a.getAll().then((all) => writeln("a: ", all)))
-          })
+          .then((a) => a.getAll())
       })
-      .should.be.fulfilled
+      .should.eventually.deep.equal([5,0])
   })
 
   /*
@@ -47,66 +41,66 @@ describe("test DistArray", function () {
   */
   it("", function () {
     return run(() => {
-      writeln()
-      writeln("test: vector addition")
+        writeln()
+        writeln("test: vector addition")
 
-      return createDomain(Locales, 16)
-        .then((d) => {
-          var calls = []
-          calls.push(Promise.resolve(d))
-          calls.push(createDistArray(d))
-          calls.push(createDistArray(d))
-          calls.push(createDistArray(d))
-          return Promise.all(calls)
-        })
-        .then((varr) => {
-          const d = varr[0]
-          const a = varr[1]
-          const b = varr[2]
-          const c = varr[3]
+        return createDomain(Locales, 16)
+          .then((d) => {
+            var calls = []
+            calls.push(Promise.resolve(d))
+            calls.push(createDistArray(d))
+            calls.push(createDistArray(d))
+            calls.push(createDistArray(d))
+            return Promise.all(calls)
+          })
+          .then((varr) => {
+            const d = varr[0]
+            const a = varr[1]
+            const b = varr[2]
+            const c = varr[3]
 
-          return Promise.resolve()
-            .then(() => a.setAll(1))
-            .then(() => b.setAll(2))
-            .then(() => c.zip(a, b).set((x, y) => x + y))
-            .then(() => a.getAll().then(writeln))
-            .then(() => b.getAll().then(writeln))
-            .then(() => c.getAll().then(writeln))
-        })
-    })
-    .should.be.fulfilled
+            return Promise.resolve()
+              .then(() => a.setAll(1))
+              .then(() => b.setAll(2))
+              .then(() => c.zip(a, b).set((x, y) => x + y))
+              .then(() => a.getAll().then(writeln))
+              .then(() => b.getAll().then(writeln))
+              .then(() => c.getAll().then(writeln))
+          })
+      })
+      .should.be.fulfilled
   })
 
   it("", function () {
     return run(() => {
-      writeln()
-      writeln("test: vector addition - test locales")
+        writeln()
+        writeln("test: vector addition - test locales")
 
-      return createDomain(Locales, 16)
-        .then((d) => {
-          var calls = []
-          calls.push(Promise.resolve(d))
-          calls.push(createDistArray(d))
-          calls.push(createDistArray(d))
-          calls.push(createDistArray(d))
-          return Promise.all(calls)
-        })
-        .then((varr) => {
-          const d = varr[0]
-          const a = varr[1]
-          const b = varr[2]
-          const c = varr[3]
+        return createDomain(Locales, 16)
+          .then((d) => {
+            var calls = []
+            calls.push(Promise.resolve(d))
+            calls.push(createDistArray(d))
+            calls.push(createDistArray(d))
+            calls.push(createDistArray(d))
+            return Promise.all(calls)
+          })
+          .then((varr) => {
+            const d = varr[0]
+            const a = varr[1]
+            const b = varr[2]
+            const c = varr[3]
 
-          return Promise.resolve()
-            .then(() => a.setAll(1))
-            .then(() => b.forAll().set((i) => i))
-            .then(() => c.zip(a, b).set((x, y) => x + y))
-            .then(() => a.getAll().then(writeln))
-            .then(() => b.getAll().then(writeln))
-            .then(() => c.getAll().then(writeln))
-        })
-    })
-    .should.be.fulfilled
+            return Promise.resolve()
+              .then(() => a.setAll(1))
+              .then(() => b.forAll().set((i) => i))
+              .then(() => c.zip(a, b).set((x, y) => x + y))
+              .then(() => a.getAll().then(writeln))
+              .then(() => b.getAll().then(writeln))
+              .then(() => c.getAll().then(writeln))
+          })
+      })
+      .should.be.fulfilled
   })
 
   // it("", function () {

@@ -217,6 +217,7 @@ var DistArray = function (domain) {
         .do(() => {
           _sys[objId][i] = v
         })
+        // .then(() => this)
     },
     map: function (r) {
       return {
@@ -300,7 +301,6 @@ var DistArray = function (domain) {
         calls.push(v)
       }
       return Promise.all(calls)
-        .then((results) => results.join(","))
     },
     [Symbol.iterator]: function () {
       return DistArrayIterator(this)
