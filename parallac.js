@@ -106,20 +106,10 @@ function on(locale) {
           var result = script.runInNewContext(locale.context())
           let kindOf = Object.prototype.toString.call(result)
           if (kindOf === "[object Promise]") {
-            console.log("is promise")
             result
               .then(resolve)
               .catch(reject)
-              // .then((v) => {
-              //   console.log("resolve", v)
-              //   resolve(v)
-              // })
-              // .catch((err) => {
-              //   console.log("rejecting", err)
-              //   reject(err)
-              // })
           } else {
-            console.log("is non-promise")
             resolve(result)
           }
         } catch (err) {
@@ -385,22 +375,7 @@ function init() {
 }
 
 function run(fn) {
-  // async(function () {
-  //   await (init()
-  //     .then((config) => on(config.Locales[0]).do(fn))
-  //     .catch((err) => {
-  //       console.log("run failed: ", err);
-  //     }))
-  // })();
-  return init()
-    .then((config) => {
-      return on(config.Locales[0])
-        .do(fn)
-        // .catch((err) => {
-        //   console.log("run failed: ", err);
-        //   throw err
-        // })
-    })
+  return init().then((config) => on(config.Locales[0]).do(fn))
 }
 
 module.exports = {

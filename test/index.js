@@ -3,9 +3,6 @@ var chaiAsPromised = require("chai-as-promised");
 chai.should();
 chai.use(chaiAsPromised);
 
-// var expect = chai.expect;
-// var assert = chai.assert;
-
 var run = require('../parallac').run
 
 describe("parallac tests", function () {
@@ -25,11 +22,11 @@ describe("parallac tests", function () {
           let locale = Locales[i]
           calls.push(on(locale)
             .with({
-              i: i + 1
+              i: i
             })
             .do(() => {
               var assert = require('assert')
-              assert.equal(5, here.id, "locale id should be " + i)
+              assert.equal(i, here.id, "locale id should be " + i)
             }))
         }
         return Promise.all(calls)
@@ -37,7 +34,7 @@ describe("parallac tests", function () {
             throw "test failed: " + "here.id on each locale"
           })
       })
-      .should.be.rejected
+      .should.be.fulfilled
     })
   })
 })
