@@ -35,11 +35,8 @@ describe("test DistArray", function () {
   c = a + b
 
   */
-  it("", function () {
+  it("vector addition: a + b = c", function () {
     return run(() => {
-        writeln()
-        writeln("test: vector addition")
-
         return createDomain(Locales, 16)
           .then((d) => {
             var calls = []
@@ -65,11 +62,8 @@ describe("test DistArray", function () {
       .should.eventually.be.deep.equal([ 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3 ])
   })
 
-  it("", function () {
+  it("vector addition and ensure locale variation: a + b = c", function () {
     return run(() => {
-        writeln()
-        writeln("test: vector addition - test locales")
-
         return createDomain(Locales, 16)
           .then((d) => {
             var calls = []
@@ -87,7 +81,7 @@ describe("test DistArray", function () {
 
             return Promise.resolve()
               .then(() => a.setAll(1))
-              .then(() => b.forAll().set((i) => i))
+              .then(() => b.forAll().set((i) => i)) // ensure each locale has different values
               .then(() => c.zip(a, b).set((x, y) => x + y))
               .then(() => c.getAll())
           })
