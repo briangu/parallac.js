@@ -29,5 +29,7 @@ The following program executes a console.log on each locale and prints the local
 
 The 'on' keyword tells the system to run the following function on the specified locale.  The system effectively moves the code to the locale, executes it in the current VM session and then marshals back any results.
 
+Test
+=
 
-
+npm test
