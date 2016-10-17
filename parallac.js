@@ -347,6 +347,22 @@ function p(fn) {
   })
 }
 
+function createLocalLocale(i, baseContext) {
+  let context = createChildContext(baseContext)
+  let locale = new Locale(i, context)
+  locale.context().here = locale
+  locale.context().on = on
+  locale.context().Domain = Domain
+  locale.context().DistArray = DistArray
+  locale.context().createDomain = createDomain
+  locale.context().createDistArray = createDistArray
+  locale.context().writeln = console.log
+  locale.context().p = p
+  locale.context()._sys = {} // TODO: do we need this?
+
+  return locale
+}
+
 function init() {
   return loadConfig()
     .then((config) => {
@@ -354,19 +370,7 @@ function init() {
 
       // create "local" locales living on the same host (and same process)
       for (let i = 0; i < config.hosts.length; i++) {
-        let context = createChildContext(BaseContext)
-        let locale = new Locale(i, context)
-        locale.context().here = locale
-        locale.context().on = on
-        locale.context().Domain = Domain
-        locale.context().DistArray = DistArray
-        locale.context().createDomain = createDomain
-        locale.context().createDistArray = createDistArray
-        locale.context().writeln = console.log
-        locale.context().p = p
-        locale.context()._sys = {} // TODO: do we need this?
-
-        Locales.push(locale)
+        Locales.push(createLocalLocale(i, BaseContext))
       }
 
       for (let locale of Locales) {
@@ -386,6 +390,7 @@ function run(fn) {
 
 module.exports = {
   run: run,
+  on: on,
   init: init,
   writeln: console.log
 }
