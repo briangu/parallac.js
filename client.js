@@ -20,15 +20,16 @@ var fnReturn = () => {
   return results
 }
 
+var sessions = {}
+
 function createFnRequest(id, fn) {
   const payload = {
     id: id,
     fn: JSON.stringify(fn.toString())
   }
+  sessions[id] = payload
   return JSON.stringify(payload)
 }
-
-var sessions = {}
 
 var socket = require('socket.io-client')('http://localhost:3000');
 socket.on('connect', function () {
@@ -38,6 +39,11 @@ socket.on('connect', function () {
 });
 socket.on('event', function (data) {
   writeln("event", data)
+  if (data.id in sessions) {
+    delete sessions[data.id]
+  } else {
+    writeln("request context not found: ", data.id)
+  }
 });
 socket.on('disconnect', function () {
   writeln("disconnect")
