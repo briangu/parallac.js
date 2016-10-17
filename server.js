@@ -13,6 +13,15 @@ var fn = () => {
   }
 }
 
+const onRequestPayload = {
+  fn: JSON.stringify(fn.toString())
+}
+const onRequest = JSON.stringify(onRequestPayload)
+
+// TODO: sessions
+// TODO: remote locales
+// TODO: deserialize on request from client
+
 function startServer(config) {
   console.log("hello")
 
@@ -29,12 +38,13 @@ function startServer(config) {
     socket.on('disconnect', function(){
       console.log('user disconnected');
     });
-    on(config.Locales[0]).do(fn)
+    // TODO: deserialize on request from client
+    var req = JSON.parse(onRequest)
+    reqFn = JSON.parse(req.fn)
+    on(config.Locales[0]).do(reqFn)
   });
 }
 
-parallac.init()
-  .then((config) => {
-    console.log("starting server")
-    startServer(config)
-  })
+parallac
+  .init()
+  .then(startServer)
