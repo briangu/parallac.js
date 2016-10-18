@@ -1,7 +1,7 @@
 var app = require('express')();
 var http = require('http').Server(app)
 var io = require('socket.io')(http)
-var parallac = require('./parallac')
+var parallac = require('../lib/parallac')
 var on = parallac.on
 var writeln = console.log
 
@@ -11,11 +11,13 @@ var writeln = console.log
 function startServer(config) {
   console.log("hello")
 
-  app.get('/', function(req, res){
+  // PROTO: rewrite writeln to remote over ws
+
+  app.get('/', function (req, res) {
     res.sendfile('index.html');
   });
 
-  app.post('/event', function(req, res){
+  app.post('/event', function (req, res) {
     console.log("post handler", data)
     var req = JSON.parse(data)
     reqFn = JSON.parse(req.fn)
@@ -29,26 +31,42 @@ function startServer(config) {
       })
   });
 
-  http.listen(3000, function(){
+  http.listen(3000, function () {
     console.log('listening on *:3000');
   });
 
-  io.on('connection', function(socket){
+  io.on('connection', function (socket) {
     console.log('a user connected');
-    socket.on('disconnect', function(){
+    socket.on('disconnect', function () {
       console.log('user disconnected');
     });
     socket.on('event', function (data) {
       console.log(data)
       var req = JSON.parse(data)
       reqFn = JSON.parse(req.fn)
-      on(config.Locales[0])
+      var sessionLocales = Locales.map((locale) => locale.createSesionContext(req.id))
+      for (let locale in sessionLocales) {
+        locale.context().writeln = function () {
+          // package all args and send over the wire for a client-side console.log
+          socket.emit('writeln', {
+            id: req.id,
+            args: JSON.stringify(arguments)
+          })
+        }
+      }
+      on(sessionLocales)
         .do(reqFn)
         .then((result) => {
-          socket.emit('event', {
+          socket.emit('result', {
             id: req.id,
             result: result
           })
+        })
+        .then(() => {
+          // close session
+        })
+        .catch(() => {
+          // close session
         })
     })
   });

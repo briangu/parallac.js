@@ -1,15 +1,17 @@
 'use strict';
 
-var parallac = require('./client')()
+var parallac = require('../lib/client')()
 var run = parallac.run
 
 // TODO: this currently prints on the server-side, we want the writeln to reroute back to the clients
 var fn = () => {
   writeln()
   writeln("test: hello from each locale")
+  var calls = []
   for (let locale of Locales) {
-    on(locale).do(() => writeln("hello from locale", here.id))
+    calls.push(on(locale).do(() => writeln("hello from locale", here.id)))
   }
+  return Promise.all(calls)
 }
 
 var fnReturn = () => {
