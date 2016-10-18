@@ -2,49 +2,61 @@ var uuid = require('uuid')
 
 var writeln = console.log
 
-var fn = () => {
-  writeln()
-  writeln("test: hello from each locale")
-  for (let locale of Locales) {
-    on(locale).do(() => writeln("hello from locale", here.id))
-  }
-}
+var outstandingRequests = {}
 
-var fnReturn = () => {
-  var results = []
-  for (let locale of Locales) {
-    on(locale)
-      .do(() => here.id)
-      .then((result) => results.push(result))
-  }
-  return results
-}
-
-var sessions = {}
-
-function createFnRequest(id, fn) {
+function createFnRequest(fn, completeFn) {
   const payload = {
-    id: id,
+    id: uuid.v4(),
     fn: JSON.stringify(fn.toString())
   }
-  sessions[id] = payload
+  outstandingRequests[payload.id] = completeFn
   return JSON.stringify(payload)
 }
 
-var socket = require('socket.io-client')('http://localhost:3000');
-socket.on('connect', function () {
-  writeln("connect")
-  socket.emit('event', createFnRequest(uuid.v4(), fn))
-  socket.emit('event', createFnRequest(uuid.v4(), fnReturn))
-});
-socket.on('event', function (data) {
-  writeln("event", data)
-  if (data.id in sessions) {
-    delete sessions[data.id]
-  } else {
-    writeln("request context not found: ", data.id)
+function completeRequest(data) {
+  var complete = outstandingRequests[data.id]
+  complete(data.result)
+  delete outstandingRequests[data.id]
+}
+
+module.exports = function(config) {
+
+  // TODO: get URLs from config
+  var socket = require('socket.io-client')('http://localhost:3000');
+
+  var module = {
+    init: function () {
+      return new Promise(function (resolve, reject) {
+        socket.on('connect', function () {
+          // writeln("connect")
+        });
+        socket.on('event', function (data) {
+          // writeln("event", data)
+          if (data.id in outstandingRequests) {
+            completeRequest(data)
+          } else {
+            writeln("request context not found: ", data.id)
+          }
+        });
+        socket.on('disconnect', function () {
+          // writeln("disconnect")
+        });
+        resolve({}) // TODO: send back parallac config
+      })
+    },
+    run: function (fn) {
+      return new Promise(function (resolve, reject) {
+        socket.emit('event', createFnRequest(fn, (result) => {
+          resolve(result)
+        }))
+      })
+    },
+    done: function () {
+      if (Object.keys(outstandingRequests).length === 0) {
+        socket.disconnect()
+      }
+    }
   }
-});
-socket.on('disconnect', function () {
-  writeln("disconnect")
-});
+
+  return module
+}

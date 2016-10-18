@@ -15,6 +15,20 @@ function startServer(config) {
     res.sendfile('index.html');
   });
 
+  app.post('/event', function(req, res){
+    console.log("post handler", data)
+    var req = JSON.parse(data)
+    reqFn = JSON.parse(req.fn)
+    on(config.Locales[0])
+      .do(reqFn)
+      .then((result) => {
+        res.send({
+          id: req.id,
+          result: result
+        })
+      })
+  });
+
   http.listen(3000, function(){
     console.log('listening on *:3000');
   });

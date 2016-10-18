@@ -363,6 +363,21 @@ function createLocalLocale(i, baseContext) {
   return locale
 }
 
+// parallac.init()
+//   .then((globalConfig) => {
+//     let SessionManager = parallac.SessionManager
+//     let session = new SessionManager(globalConfig)
+//     return session
+//       .do(() => {
+//         for (let locale of Locales) {
+//           on(locale)
+//             .do(() => {
+//               writeln("hello from locale", here.id)
+//             })
+//         }
+//       })
+//   })
+
 function init() {
   return loadConfig()
     .then((config) => {
