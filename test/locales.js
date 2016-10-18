@@ -3,7 +3,7 @@ var chaiAsPromised = require("chai-as-promised");
 chai.should();
 chai.use(chaiAsPromised);
 
-var run = require('../parallac').run
+var run = require('../lib/parallac').run
 
 describe("test locales", function () {
   it("here.id on locale 0", function () {
