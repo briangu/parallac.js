@@ -44,8 +44,10 @@ function startServer(config) {
       console.log(data)
       var req = JSON.parse(data)
       reqFn = JSON.parse(req.fn)
-      var sessionLocales = Locales.map((locale) => locale.createSessionContext(req.id))
-      for (let locale in sessionLocales) {
+      // TODO: req.id should be generated here and sent back to client
+      var sessionLocales = config.Locales.map((locale) => locale.createSessionContext(req.id))
+      for (let locale of sessionLocales) {
+        locale.context().Locales = sessionLocales
         locale.context().writeln = function () {
           // package all args and send over the wire for a client-side console.log
           socket.emit('writeln', {
@@ -54,7 +56,7 @@ function startServer(config) {
           })
         }
       }
-      on(sessionLocales[0])
+      on(sessionLocales[0], req.id)
         .do(reqFn)
         .then((result) => {
           socket.emit('result', {
@@ -63,10 +65,10 @@ function startServer(config) {
           })
         })
         .then(() => {
-          // close session
+          config.Locales.forEach((locale) => locale.destroySessionContext(req.id))
         })
         .catch(() => {
-          // close session
+          config.Locales.forEach((locale) => locale.destroySessionContext(req.id))
         })
     })
   });

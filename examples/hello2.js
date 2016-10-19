@@ -4,8 +4,10 @@ var parallac = require('../lib/client')()
 var run = parallac.run
 
 run(() => {
-  writeln("hello from each locale:")
+  var calls = []
   for (let locale of Locales) {
-    on(locale).do(() => writeln("hello from locale", here.id))
+    calls.push(on(locale).do(() => here.id))
   }
+  return Promise.all(calls)
 })
+.then(console.log)
