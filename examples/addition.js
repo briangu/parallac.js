@@ -3,6 +3,20 @@
 var parallac = require('../lib/client')()
 var run = parallac.run
 
+/*
+
+"assembly language" (post-transpiled) version of:
+
+let d = domain(Locales, 16)
+let a = DistArray(d)
+let b = DistArray(d)
+let c = DistArray(d)
+
+a = 1
+b = 2
+c = a + b
+
+*/
 run(() => {
   return createDomain(Locales, 16)
     .then((d) => {

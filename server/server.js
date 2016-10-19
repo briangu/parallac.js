@@ -50,9 +50,13 @@ function startServer(config) {
         locale.context().Locales = sessionLocales
         locale.context().writeln = function () {
           // package all args and send over the wire for a client-side console.log
+          let values = [locale.id + ":"]
+          for (let k of Object.keys(arguments)) {
+            values.push(arguments[k])
+          }
           socket.emit('writeln', {
             id: req.id,
-            args: JSON.stringify(arguments)
+            args: JSON.stringify(values)
           })
         }
       }
