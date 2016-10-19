@@ -10,4 +10,6 @@ run(() => {
   }
   return Promise.all(calls)
 })
-.then(console.log)
+.then((results) => {
+  console.log("locale ids sent from each locale: ", results)
+})
