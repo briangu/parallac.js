@@ -21,17 +21,15 @@ run(() => {
   return createDomain(Locales, 16)
     .then((d) => {
       let calls = []
-      calls.push(Promise.resolve(d))
       calls.push(createDistArray(d))
       calls.push(createDistArray(d))
       calls.push(createDistArray(d))
       return Promise.all(calls)
     })
     .then((varr) => {
-      const d = varr[0]
-      const a = varr[1]
-      const b = varr[2]
-      const c = varr[3]
+      const a = varr[0]
+      const b = varr[1]
+      const c = varr[2]
 
       let calls = []
       calls.push(a.setAll(1))
