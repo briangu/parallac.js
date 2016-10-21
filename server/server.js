@@ -40,8 +40,7 @@ function startServer(config) {
     socket.on('disconnect', function () {
       console.log('user disconnected');
     });
-    socket.on('event', function (data) {
-      console.log(data)
+    socket.on('run', function (data) {
       var req = JSON.parse(data)
       reqFn = JSON.parse(req.fn)
       // TODO: req.id should be generated here and sent back to client
