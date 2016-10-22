@@ -23,7 +23,7 @@ function startServer(config) {
       .do(reqFn)
       .then((result) => {
         res.send({
-          id: req.id,
+          id: sessionId,
           result: result
         })
       })
@@ -34,9 +34,9 @@ function startServer(config) {
   })
 
   io.on('connection', function (socket) {
-    console.log('a user connected')
 
     function createSession(sessionId) {
+      console.log("create session", sessionId)
       var sessionLocales = config.Locales.map((locale) => locale.createSessionContext(sessionId))
       for (let locale of sessionLocales) {
         locale.context().Locales = sessionLocales
@@ -55,61 +55,36 @@ function startServer(config) {
       return sessionLocales
     }
 
-    function destroySession(sessionId) {
-      console.log("destroying session", sessionId)
-      config.Locales.forEach((locale) => locale.destroySessionContext(sessionId))
+    function closeSession(sessionId) {
+      console.log("closing session", sessionId)
+      config.Locales.forEach((locale) => locale.closeSessionContext(sessionId))
     }
 
-    var sessions = {}
-
-    socket.on('connect', function () {
-      console.log('user connected')
+    let sessionId = uuid.v4()
+    let sessionLocales = createSession(sessionId)
+    socket.emit('session', {
+      id: sessionId
     })
 
     socket.on('disconnect', function () {
-      console.log('user disconnected')
-      let remainingSessions = Object.keys(sessions)
-      if (remainingSessions.length > 0) {
-        console.log("abandoning sessions: ", remainingSessions)
-        remainingSessions.forEach((sessionId) => {
-          destroySession(sessionId)
-          delete sessions[sessionId]
-        })
-      }
-    })
-
-    socket.on('create_session', function (req) {
-      console.log("creating session", req.id)
-
-      if (req.id in sessions) {
-        console.log("WARNING: session id already exists!", req.id)
-      }
-
-      sessions[req.id] = createSession(req.id)
-    })
-
-    socket.on('destroy_session', function (req) {
-      destroySession(req.id)
-      delete sessions[req.id]
+      closeSession(sessionId)
     })
 
     socket.on('on', function (req) {
       reqFn = JSON.parse(req.fn)
-      let sessionLocales = sessions[req.id]
-      if (sessionLocales) {
-        let here = sessionLocales[config.here.id]
-
-        on(here, req.id)
-          .do(reqFn)
-          .then((result) => {
-            socket.emit('result', {
-              id: req.id,
-              result: result
-            })
+      let here = sessionLocales[config.here.id]
+      on(here, sessionId)
+        .do(reqFn)
+        .then((result) => {
+          socket.emit('result', {
+            id: sessionId,
+            result: result
           })
-      } else {
-        console.log("on", "unknown session", req.id)
-      }
+        })
+        .catch((err) => {
+          console.log('on', 'error', err)
+          throw err
+        })
     })
   })
 }
