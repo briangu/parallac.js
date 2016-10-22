@@ -1,6 +1,6 @@
 'use strict';
 
-var parallac = require('../lib/client')()
+var parallac = require('../lib/parallac')()
 var run = parallac.run
 
 run(() => {
