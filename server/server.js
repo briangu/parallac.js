@@ -6,7 +6,6 @@ var on = parallac.on
 var writeln = console.log
 var uuid = require('uuid')
 
-// TODO: sessions
 // TODO: remote locales
 
 function startServer(config) {
@@ -98,7 +97,7 @@ function startServer(config) {
       reqFn = JSON.parse(req.fn)
       let sessionLocales = sessions[req.id]
       if (sessionLocales) {
-        let here = sessionLocales[0] // TODO: find here
+        let here = sessionLocales[config.here.id]
 
         on(here, req.id)
           .do(reqFn)
