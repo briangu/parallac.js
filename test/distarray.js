@@ -8,6 +8,12 @@ var run = require('../lib/parallac').run
 const testLocaleConfig = {
   locales: [{
     URI: "http://localhost:3000"
+  },{
+    URI: "http://localhost:3000"
+  },{
+    URI: "http://localhost:3000"
+  },{
+    URI: "http://localhost:3000"
   }],
   here: {
     URI: "http://localhost:3000"
