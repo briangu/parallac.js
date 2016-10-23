@@ -60,6 +60,13 @@ function startServer(config) {
       config.Locales.forEach((locale) => locale.closeSessionContext(sessionId))
     }
 
+    function reportRequestError(req, err) {
+      socket.emit('error', {
+        req: req,
+        error: err
+      })
+    }
+
     let sessionId = uuid.v4()
     let sessionLocales = createSession(sessionId)
     socket.emit('session', {
@@ -71,13 +78,20 @@ function startServer(config) {
     })
 
     socket.on('on', function (req) {
+      if (req.id !== sessionId) {
+        console.log("on", "session id not found", req.id)
+        reportRequestError(req, "session id not found on server")
+        return
+      }
+
       reqFn = JSON.parse(req.fn)
       let here = sessionLocales[config.here.id]
-      on(here, sessionId)
+      on(here)
         .do(reqFn)
         .then((result) => {
           socket.emit('result', {
-            id: sessionId,
+            id: req.id,
+            requestId: req.requestId,
             result: result
           })
         })
