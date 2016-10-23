@@ -5,9 +5,19 @@ chai.use(chaiAsPromised);
 
 var run = require('../lib/parallac').run
 
+const testLocaleConfig = {
+  locales: [{
+    URI: "http://localhost:3000"
+  }],
+  here: {
+    URI: "http://localhost:3000"
+  }
+}
+var testRun = (fn) => run(fn, testLocaleConfig)
+
 describe("test DistArray", function () {
   it("test DistArray iterator", function () {
-    return run(() => {
+    return testRun(() => {
         var assert = require('assert')
         return createDomain(Locales, 2)
           .then((d) => createDistArray(d))
@@ -36,7 +46,7 @@ describe("test DistArray", function () {
 
   */
   it("vector addition: a + b = c", function () {
-    return run(() => {
+    return testRun(() => {
         return createDomain(Locales, 16)
           .then((d) => {
             let calls = []
@@ -65,7 +75,7 @@ describe("test DistArray", function () {
   })
 
   it("vector addition and ensure locale variation: a + b = c", function () {
-    return run(() => {
+    return testRun(() => {
         return createDomain(Locales, 16)
           .then((d) => {
             let calls = []

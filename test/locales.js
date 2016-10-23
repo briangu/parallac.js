@@ -5,9 +5,19 @@ chai.use(chaiAsPromised);
 
 var run = require('../lib/parallac').run
 
+const testLocaleConfig = {
+  locales: [{
+    URI: "http://localhost:3000"
+  }],
+  here: {
+    URI: "http://localhost:3000"
+  }
+}
+var testRun = (fn) => run(fn, testLocaleConfig)
+
 describe("test locales", function () {
   it("here.id on locale 0", function () {
-    return run(() => {
+    return testRun(() => {
         var assert = require('assert')
         assert.equal(0, here.id, "locale id should be 0")
         return here.id
@@ -16,7 +26,7 @@ describe("test locales", function () {
   })
 
   it("here.id on each locale", function () {
-    return run(() => {
+    return testRun(() => {
         var calls = []
         for (let i = 0; i < Locales.length; i++) {
           let locale = Locales[i]
