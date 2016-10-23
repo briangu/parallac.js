@@ -40,14 +40,46 @@ function startServer(config) {
       })
     }
 
+    function createSessionForLocaleLocale(locale, sessionId, socket) {
+      var sessionLocale = locale.createSessionContext(sessionId)
+      sessionLocale.context().writeln = function () {
+        // package all args and send over the wire for a client-side console.log
+        let values = [locale.id + ":"]
+        for (let k of Object.keys(arguments)) {
+          values.push(arguments[k])
+        }
+        socket.emit('writeln', {
+          id: sessionId,
+          args: JSON.stringify(values)
+        })
+      }
+      return sessionLocale
+    }
+
+
     let sessionId
     let sessionLocales = config.Locales
 
     socket.on('session', function (data) {
       sessionId = data.id
 
-      sessionLocales = parallac.createSession(config, sessionId)
-        // .then((sl) => sessionLocales = sl)
+      sessionLocales = config.Locales.slice(0) // https://davidwalsh.name/javascript-clone-array
+      sessionLocales[config.here.id] = config.here.createSessionContext()
+
+      sessionLocales[config.here.id].context().writeln = function () {
+        // package all args and send over the wire for a client-side console.log
+        let values = [locale.id + ":"]
+        for (let k of Object.keys(arguments)) {
+          values.push(arguments[k])
+        }
+        socket.emit('writeln', {
+          id: sessionId,
+          args: JSON.stringify(values)
+        })
+      }
+      // sessionLocales = parallac.createSession(config, sessionId)
+      // .then((sl) => sessionLocales = sl)
+      config.here.createS
     })
 
     socket.on('disconnect', function () {
