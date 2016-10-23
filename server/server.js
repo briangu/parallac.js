@@ -6,8 +6,6 @@ var on = parallac.on
 var writeln = console.log
 var uuid = require('uuid')
 
-// TODO: remote locales
-
 function startServer(config) {
   console.log("hello")
 
@@ -35,31 +33,6 @@ function startServer(config) {
 
   io.on('connection', function (socket) {
 
-    function createSession(sessionId) {
-      console.log("create session", sessionId)
-      var sessionLocales = config.Locales.map((locale) => locale.createSessionContext(sessionId))
-      for (let locale of sessionLocales) {
-        locale.context().Locales = sessionLocales
-        locale.context().writeln = function () {
-          // package all args and send over the wire for a client-side console.log
-          let values = [locale.id + ":"]
-          for (let k of Object.keys(arguments)) {
-            values.push(arguments[k])
-          }
-          socket.emit('writeln', {
-            id: sessionId,
-            args: JSON.stringify(values)
-          })
-        }
-      }
-      return sessionLocales
-    }
-
-    function closeSession(sessionId) {
-      console.log("closing session", sessionId)
-      config.Locales.forEach((locale) => locale.closeSessionContext(sessionId))
-    }
-
     function reportRequestError(req, err) {
       socket.emit('error', {
         req: req,
@@ -67,14 +40,20 @@ function startServer(config) {
       })
     }
 
-    let sessionId = uuid.v4()
-    let sessionLocales = createSession(sessionId)
-    socket.emit('session', {
-      id: sessionId
+    let sessionId
+    let sessionLocales = config.Locales
+
+    socket.on('session', function (data) {
+      sessionId = data.id
+
+      sessionLocales = parallac.createSession(config, sessionId)
+        // .then((sl) => sessionLocales = sl)
     })
 
     socket.on('disconnect', function () {
-      closeSession(sessionId)
+      if (sessionId) {
+        parallac.closeSession(sessionId)
+      }
     })
 
     socket.on('on', function (req) {
