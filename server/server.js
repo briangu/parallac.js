@@ -57,7 +57,7 @@ function startServer(config) {
           session.Locales[session.here.id] = session.here
           session.here.context().writeln = function () {
             // package all args and send over the wire for a client-side console.log
-            let values = [locale.id + ":"]
+            let values = [session.here.id + ":"]
             for (let k of Object.keys(arguments)) {
               values.push(arguments[k])
             }
@@ -66,6 +66,12 @@ function startServer(config) {
               args: JSON.stringify(values)
             })
           }
+
+          console.log("createSession", "session.here", session.here)
+        })
+        .catch((err) => {
+          console.log("createSession", "error", err)
+          throw err
         })
     }
 
