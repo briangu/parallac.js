@@ -21,7 +21,7 @@ function startServer(config) {
       .do(reqFn)
       .then((result) => {
         res.send({
-          id: sessionId,
+          id: req.id,
           result: result
         })
       })
@@ -35,6 +35,8 @@ function startServer(config) {
 
   io.on('connection', function (socket) {
 
+    let session = {}
+
     function reportRequestError(req, err) {
       socket.emit('error', {
         req: req,
@@ -42,67 +44,61 @@ function startServer(config) {
       })
     }
 
-    function createSessionForLocaleLocale(locale, sessionId, socket) {
-      var sessionLocale = locale.createSessionContext(sessionId)
-      sessionLocale.context().writeln = function () {
-        // package all args and send over the wire for a client-side console.log
-        let values = [locale.id + ":"]
-        for (let k of Object.keys(arguments)) {
-          values.push(arguments[k])
+    function createSession(sessionId) {
+      session.id = sessionId
+      session.Locales = config.Locales.slice(0)
+      for (let i = 0; i < config.Locales.length; i++) {
+        if (i === config.here.id) {
+          session.here = config.here.createSessionContext(sessionId)
+          session.here.context().writeln = function () {
+            // package all args and send over the wire for a client-side console.log
+            let values = [locale.id + ":"]
+            for (let k of Object.keys(arguments)) {
+              values.push(arguments[k])
+            }
+            socket.emit('writeln', {
+              id: session.id,
+              args: JSON.stringify(values)
+            })
+          }
+          session.Locales[i] = session.here
+        } else {
+          let remoteLocale = session.Locales[i]
+          session.Locales[i] = new RemoteLocale(rl.config, rl.id, sessionId)
         }
-        socket.emit('writeln', {
-          id: sessionId,
-          args: JSON.stringify(values)
-        })
       }
-      return sessionLocale
     }
 
-    let sessionId
-    let sessionLocales = config.Locales
+    function closeSession() {
+      config.here.closeSessionContext(session.id)
+      session = {}
+    }
 
-    socket.on('session', function (data) {
-      sessionId = data.id
-
-      sessionLocales = config.Locales.slice(0) // https://davidwalsh.name/javascript-clone-array
-      sessionLocales[config.here.id] = config.here.createSessionContext()
-
-      sessionLocales[config.here.id].context().writeln = function () {
-        // package all args and send over the wire for a client-side console.log
-        let values = [locale.id + ":"]
-        for (let k of Object.keys(arguments)) {
-          values.push(arguments[k])
-        }
-        socket.emit('writeln', {
-          id: sessionId,
-          args: JSON.stringify(values)
-        })
-      }
-      // sessionLocales = parallac.createSession(config, sessionId)
-      // .then((sl) => sessionLocales = sl)
-      config.here.createS
+    socket.on('connect', function (data) {
+      console.log("connect", data)
     })
 
-    socket.on('disconnect', function () {
+    socket.on('disconnect', function (data) {
+      console.log("disconnect", sessionId)
       if (sessionId) {
-        parallac.closeSession(sessionId)
+        closeSession(sessionId)
       }
     })
 
     socket.on('on', function (req) {
-      if (req.id !== sessionId) {
-        console.log("on", "session id not found", req.id)
+      let here = config.Locales[config.here.id].sessions[req.sessionId]
+      if (!here) {
+        console.log("on", "session id not found", req.sessionId)
         reportRequestError(req, "session id not found on server")
         return
       }
 
       reqFn = JSON.parse(req.fn)
-      let here = sessionLocales[config.here.id]
       on(here)
         .do(reqFn)
         .then((result) => {
           socket.emit('result', {
-            id: req.id,
+            sessionId: req.id,
             requestId: req.requestId,
             result: result
           })
@@ -115,12 +111,12 @@ function startServer(config) {
 
     socket.on('createSessionContext', function (req) {
       console.log("createSessionContext", req)
-      const sessionId = req.sessionId
+      createSession(req.sessionId)
     })
 
     socket.on('closeSessionContext', function (req) {
       console.log("closeSessionContext", req)
-      const sessionId = req.sessionId
+      closeSession(req.sessionId)
     })
   })
 }
