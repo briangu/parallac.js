@@ -54,17 +54,23 @@ function startServer(config) {
       return config.here.createSessionContext(sessionId)
         .then((here) => {
           session.here = here
-          session.Locales[session.here.id] = session.here
-          session.here.context().writeln = function () {
-            // package all args and send over the wire for a client-side console.log
-            let values = [session.here.id + ":"]
-            for (let k of Object.keys(arguments)) {
-              values.push(arguments[k])
+          for (let i = 0; i < session.Locales.length; i++) {
+            if (i === here.id) {
+              session.Locales[session.here.id] = session.here
+              session.here.context().writeln = function () {
+                // package all args and send over the wire for a client-side console.log
+                let values = [session.here.id + ":"]
+                for (let k of Object.keys(arguments)) {
+                  values.push(arguments[k])
+                }
+                socket.emit('writeln', {
+                  id: session.id,
+                  args: JSON.stringify(values)
+                })
+              }
+            } else {
+              session.Locales[i] = session.Locales[i].cloneSessionProxy(session.id)
             }
-            socket.emit('writeln', {
-              id: session.id,
-              args: JSON.stringify(values)
-            })
           }
 
           console.log("createSession", "session.here", session.here)
@@ -100,7 +106,8 @@ function startServer(config) {
 
     socket.on('on', function (req) {
       reqFn = JSON.parse(req.fn)
-      on(session.here)
+      let here = session.here || config.here.sessions[req.sessionId]
+      on(here)
         .do(reqFn)
         .then((result) => {
           socket.emit('result', {
