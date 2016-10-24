@@ -27,8 +27,10 @@ function startServer(config) {
       })
   })
 
-  http.listen(3000, function () {
-    console.log('listening on *:3000')
+  var port = parseInt(require('url').parse(config.here.config.URI).port)
+
+  http.listen(port, function () {
+    console.log('listening on *:'+port)
   })
 
   io.on('connection', function (socket) {
