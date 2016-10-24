@@ -56,7 +56,6 @@ function startServer(config) {
       return sessionLocale
     }
 
-
     let sessionId
     let sessionLocales = config.Locales
 
@@ -110,6 +109,16 @@ function startServer(config) {
           console.log('on', 'error', err)
           throw err
         })
+    })
+
+    socket.on('createSessionContext', function (req) {
+      console.log("createSessionContext", req)
+      const sessionId = req.sessionId
+    })
+
+    socket.on('closeSessionContext', function (req) {
+      console.log("closeSessionContext", req)
+      const sessionId = req.sessionId
     })
   })
 }
