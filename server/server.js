@@ -45,11 +45,16 @@ function startServer(config) {
     }
 
     function createSession(sessionId) {
+      console.log("createSession", sessionId)
+      if (session.id) {
+        throw "WARNING: session already exists:" + session.id
+      }
       session.id = sessionId
       session.Locales = config.Locales.slice(0)
-      for (let i = 0; i < config.Locales.length; i++) {
-        if (i === config.here.id) {
-          session.here = config.here.createSessionContext(sessionId)
+      return config.here.createSessionContext(sessionId)
+        .then((here) => {
+          session.here = here
+          session.Locales[session.here.id] = session.here
           session.here.context().writeln = function () {
             // package all args and send over the wire for a client-side console.log
             let values = [locale.id + ":"]
@@ -61,44 +66,39 @@ function startServer(config) {
               args: JSON.stringify(values)
             })
           }
-          session.Locales[i] = session.here
-        } else {
-          let remoteLocale = session.Locales[i]
-          session.Locales[i] = new RemoteLocale(rl.config, rl.id, sessionId)
-        }
-      }
+        })
     }
 
     function closeSession() {
-      config.here.closeSessionContext(session.id)
-      session = {}
+      console.log("closeSession", session.id)
+      if (session.id) {
+        config.here.closeSessionContext(session.id)
+        session = {}
+      }
     }
+
+    socket.on('error', function (data) {
+      console.log("error", data)
+    })
 
     socket.on('connect', function (data) {
       console.log("connect", data)
     })
 
     socket.on('disconnect', function (data) {
-      console.log("disconnect", sessionId)
-      if (sessionId) {
-        closeSession(sessionId)
+      console.log("disconnect", session.id)
+      if (session.id) {
+        closeSession(session.id)
       }
     })
 
     socket.on('on', function (req) {
-      let here = config.Locales[config.here.id].sessions[req.sessionId]
-      if (!here) {
-        console.log("on", "session id not found", req.sessionId)
-        reportRequestError(req, "session id not found on server")
-        return
-      }
-
       reqFn = JSON.parse(req.fn)
-      on(here)
+      on(session.here)
         .do(reqFn)
         .then((result) => {
           socket.emit('result', {
-            sessionId: req.id,
+            sessionId: session.id,
             requestId: req.requestId,
             result: result
           })
