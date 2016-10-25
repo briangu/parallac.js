@@ -4,7 +4,6 @@
   "description": "distributed computing experiment based on Chapel",
   "main": "index.js",
   "dependencies": {
-    "asyncawait": "^1.0.6",
     "express": "^4.14.0",
     "requestify": "^0.2.4",
     "socket.io": "^1.5.0",
