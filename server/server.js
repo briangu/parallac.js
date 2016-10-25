@@ -7,14 +7,14 @@ var writeln = console.log
 var uuid = require('uuid')
 
 function startServer(config) {
-  console.log("hello")
+  writeln("hello")
 
   app.get('/', function (req, res) {
     res.sendfile('index.html')
   })
 
   app.post('/event', function (req, res) {
-    console.log("post handler", data)
+    writeln("post handler", data)
     var req = JSON.parse(data)
     reqFn = JSON.parse(req.fn)
     on(config.Locales[0])
@@ -30,7 +30,7 @@ function startServer(config) {
   var port = parseInt(require('url').parse(config.here.config.URI).port)
 
   http.listen(port, function () {
-    console.log('listening on *:'+port)
+    writeln('listening on *:'+port)
   })
 
   io.on('connection', function (socket) {
@@ -45,7 +45,7 @@ function startServer(config) {
     }
 
     function createSession(sessionId) {
-      console.log("createSession", sessionId)
+      writeln("createSession", "for session id", sessionId)
       if (session.id) {
         throw "WARNING: session already exists:" + session.id
       }
@@ -69,20 +69,25 @@ function startServer(config) {
                 })
               }
             } else {
-              session.Locales[i] = session.Locales[i].cloneSessionProxy(session.id)
+              writeln("createSession", "remote proxy", i)
+              session.Locales[i] = session.Locales[i].createSessionProxy(session.id)
             }
           }
 
-          console.log("createSession", "session.here", session.here)
+          for (let i = 0; i < session.Locales.length; i++) {
+            session.Locales[i].Locales = session.Locales
+          }
+
+          writeln("createSession", "session.here", session.here)
         })
         .catch((err) => {
-          console.log("createSession", "error", err)
+          writeln("createSession", "error", err)
           throw err
         })
     }
 
     function closeSession() {
-      console.log("closeSession", session.id)
+      writeln("closeSession", session.id)
       if (session.id) {
         config.here.closeSessionContext(session.id)
         session = {}
@@ -90,23 +95,25 @@ function startServer(config) {
     }
 
     socket.on('error', function (data) {
-      console.log("error", data)
+      writeln("error", data)
     })
 
     socket.on('connect', function (data) {
-      console.log("connect", data)
+      writeln("connect", data)
     })
 
     socket.on('disconnect', function (data) {
-      console.log("disconnect", session.id)
+      writeln("disconnect", session.id)
       if (session.id) {
         closeSession(session.id)
       }
     })
 
     socket.on('on', function (req) {
+      console.log("server", "on", req, Object.keys(config.here.sessions))
       reqFn = JSON.parse(req.fn)
       let here = session.here || config.here.sessions[req.sessionId]
+      writeln("server", "on", "here", session.here)
       on(here)
         .do(reqFn)
         .then((result) => {
@@ -117,18 +124,18 @@ function startServer(config) {
           })
         })
         .catch((err) => {
-          console.log('on', 'error', err)
+          writeln('on', 'error', err)
           throw err
         })
     })
 
     socket.on('createSessionContext', function (req) {
-      console.log("createSessionContext", req)
+      writeln("createSessionContext", req)
       createSession(req.sessionId)
     })
 
     socket.on('closeSessionContext', function (req) {
-      console.log("closeSessionContext", req)
+      writeln("closeSessionContext", req)
       closeSession(req.sessionId)
     })
   })
