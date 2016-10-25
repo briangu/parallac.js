@@ -64,7 +64,7 @@ function startServer(config) {
                   values.push(arguments[k])
                 }
                 socket.emit('writeln', {
-                  id: session.id,
+                  sessionId: session.id,
                   args: JSON.stringify(values)
                 })
               }
@@ -74,9 +74,11 @@ function startServer(config) {
             }
           }
 
-          for (let i = 0; i < session.Locales.length; i++) {
-            session.Locales[i].Locales = session.Locales
-          }
+          // for (let i = 0; i < session.Locales.length; i++) {
+          //   session.Locales[i].Locales = session.Locales
+          // }
+          session.here.Locales = session.Locales
+          session.here.context().Locales = session.Locales
 
           writeln("createSession", "session.here", session.here)
         })
@@ -110,7 +112,7 @@ function startServer(config) {
     })
 
     socket.on('on', function (req) {
-      console.log("server", "on", req, Object.keys(config.here.sessions))
+      console.log("server", "on", req, Object.keys(config.here.sessions), !!session.here)
       reqFn = JSON.parse(req.fn)
       let here = session.here || config.here.sessions[req.sessionId]
       writeln("server", "on", "here", session.here)
