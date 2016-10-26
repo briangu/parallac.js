@@ -7,16 +7,16 @@ var run = require('../lib/parallac').run
 
 const testLocaleConfig = {
   locales: [{
-    URI: "http://localhost:3000"
+    URI: "memory://1"
   },{
-    URI: "http://localhost:3000"
+    URI: "memory://1"
   },{
-    URI: "http://localhost:3000"
+    URI: "memory://1"
   },{
-    URI: "http://localhost:3000"
+    URI: "memory://1"
   }],
   here: {
-    URI: "http://localhost:3000"
+    URI: "memory://1"
   }
 }
 var testRun = (fn) => run(fn, testLocaleConfig)
