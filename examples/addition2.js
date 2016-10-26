@@ -5,6 +5,8 @@ var run = parallac.run
 
 /*
 
+IN PROGRESS: DistArray is currently broken until I fix the remoting of symbol creation
+
 "assembly language" (post-transpiled) version of:
 
 let d = domain(Locales, 16)
