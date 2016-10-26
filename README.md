@@ -12,11 +12,11 @@ Acknowledgement: Parallac.js is heavily based on the concepts of the Chapel Lang
 Application ideas
 =
 
-    Rapid prototyping for IoT devices
-    Distributed web-based applications
-    A different take on serverless computing
-    A different take on microservices
-    Computation (using data and task parallelism)
+* Rapid prototyping for IoT devices
+* Distributed web-based applications
+* A different take on serverless computing
+* A different take on microservices
+* Computation (using data and task parallelism)
 
 Concepts
 =
