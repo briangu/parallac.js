@@ -25,18 +25,12 @@ Examples
 Hello, World!
 -
 
-The following program executes a writeln (distributed console.log) on each locale and prints the locale id:
+The following program executes a writeln (distributed console.log) on each locale and prints the locale id on each locale:
 
-    run(() => {
-      writeln("hello from each locale:")
-      for (let locale of Locales) {
-        on(locale).do(() => writeln("hello from locale", here.id))
-      }
-    })
+    run(() => Locales.map((locale) => on(locale).do(() => writeln("hello from locale", here.id))))
 
-The expected output is
+Assuming there are 4 locales available to run on, the expected output is
 
-    0: hello from each locale:
     0: hello from locale 0
     1: hello from locale 1
     2: hello from locale 2
@@ -51,20 +45,25 @@ The 'on' keyword tells the system to run the specified function on the specified
 Try it!
 -
 
-start the server:
+start the Parallac cluster (servers):
 --
-    $ cd server
-    $ node server.js
 
-run the code on the server:
+server 1
+---
+    $ cd server
+    $ PARALLAC_HERE=http://localhost:3000 PARALLAC_SERVERS=http://localhost:3000,http://localhost:3001 node server.js
+
+server 2
+---
+    $ cd server
+    $ PARALLAC_HERE=http://localhost:3001 PARALLAC_SERVERS=http://localhost:3000,http://localhost:3001 node server.js
+
+run the code on the Parallac cluster:
 --
     $ cd examples
-    $ node hello.js
-    0: hello from each locale:
+    $ PARALLAC_SERVERS=http://localhost:3000,http://localhost:3001 node hello
     0: hello from locale 0
     1: hello from locale 1
-    2: hello from locale 2
-    3: hello from locale 3
 
 
 Test
