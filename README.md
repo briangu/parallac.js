@@ -73,6 +73,11 @@ Try it!
 Start the Parallac cluster (servers):
 --
 
+There are two environment variables that configure services
+
+PARALLAC_SERVERS is a comma separated list of URIs of Parallac servers
+PARALLAC_HERE is a URI indicating which of the PARALLAC_SERVERS entries is this locale (here)
+
 server 1
 ---
     $ cd server
@@ -85,6 +90,9 @@ server 2
 
 Run the code on the Parallac cluster:
 --
+
+We tell the client application where the PARALLAC_SERVERS are and run 'hello'
+
     $ cd examples
     $ PARALLAC_SERVERS=http://localhost:3000,http://localhost:3001 node hello
     0: hello from locale 0
