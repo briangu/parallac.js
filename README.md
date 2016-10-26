@@ -73,10 +73,10 @@ Try it!
 Start the Parallac cluster (servers):
 --
 
-There are two environment variables that configure services
+There are two environment variables that configure services:
 
-PARALLAC_SERVERS is a comma separated list of URIs of Parallac servers
-PARALLAC_HERE is a URI indicating which of the PARALLAC_SERVERS entries is this locale (here)
+* PARALLAC_SERVERS is a comma separated list of URIs of Parallac servers
+* PARALLAC_HERE is a URI indicating which of the PARALLAC_SERVERS entries is this locale (here)
 
 server 1
 ---
