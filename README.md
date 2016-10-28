@@ -78,15 +78,20 @@ There are two environment variables that configure services:
 * PARALLAC_SERVERS is a comma separated list of URIs of Parallac servers
 * PARALLAC_HERE is a URI indicating which of the PARALLAC_SERVERS entries is this locale (here)
 
-server 1
+Set environment
 ---
-    $ cd server
-    $ PARALLAC_HERE=http://localhost:3000 PARALLAC_SERVERS=http://localhost:3000,http://localhost:3001 node server.js
+    $ source bin/setenv.sh
+    PARALLAC_SERVERS=http://localhost:3000,http://localhost:3001
 
-server 2
+Server 1
 ---
     $ cd server
-    $ PARALLAC_HERE=http://localhost:3001 PARALLAC_SERVERS=http://localhost:3000,http://localhost:3001 node server.js
+    $ PARALLAC_HERE=http://localhost:3000 node server.js
+
+Server 2
+---
+    $ cd server
+    $ PARALLAC_HERE=http://localhost:3001 node server.js
 
 Run the code on the Parallac cluster:
 --
@@ -94,7 +99,7 @@ Run the code on the Parallac cluster:
 We tell the client application where the PARALLAC_SERVERS are and run 'hello'
 
     $ cd examples
-    $ PARALLAC_SERVERS=http://localhost:3000,http://localhost:3001 node hello
+    $ node hello
     0: hello from locale 0
     1: hello from locale 1
 

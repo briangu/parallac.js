@@ -129,16 +129,26 @@ function startServer(config) {
           writeln('on', 'error', err)
           throw err
         })
+      // TODO: RPC result
     })
 
     socket.on('createSessionContext', function (req) {
       writeln("createSessionContext", req)
       createSession(req.sessionId)
+      // TODO: RPC result
     })
 
     socket.on('closeSessionContext', function (req) {
       writeln("closeSessionContext", req)
       closeSession(req.sessionId)
+      // TODO: RPC result
+    })
+
+    socket.on('setSymbol', function (req) {
+      writeln("setSymbol", req)
+      let here = session.here || config.here.sessions[req.sessionId]
+      here.setSymbol(req.symbolId, req.value)
+      // TODO: RPC result
     })
   })
 }
