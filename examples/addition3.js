@@ -39,9 +39,16 @@ run(() => {
 
       return Promise.all(calls)
         .then(() => c.zip(a, b).set((x, y) => x + y))
-        .then(() => c.getAll())
+        .then(() => {
+          let calls = []
+          calls.push(a.getAll())
+          calls.push(b.getAll())
+          calls.push(c.getAll())
+          return Promise.all(calls)
+        })
     })
 })
 .then((results) => {
-  console.log("a + b = ", results)
+  console.log("a + b = c")
+  console.log(results[0] + " + " + results[1] + " = " + results[2])
 })

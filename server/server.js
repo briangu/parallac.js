@@ -115,7 +115,7 @@ function startServer(config) {
       console.log("server", "on", req, Object.keys(config.here.sessions), !!session.here)
       reqFn = JSON.parse(req.fn)
       let here = session.here || config.here.sessions[req.sessionId]
-      writeln("server", "on", "here", session.here)
+      writeln("server", "on", "here", here)
       on(here)
         .do(reqFn)
         .then((result) => {
@@ -148,6 +148,20 @@ function startServer(config) {
       writeln("setSymbol", req)
       let here = session.here || config.here.sessions[req.sessionId]
       here.setSymbol(req.symbolId, req.value)
+      // TODO: RPC result
+    })
+
+    socket.on('pushContext', function (req) {
+      writeln("pushContext", req)
+      let here = session.here || config.here.sessions[req.sessionId]
+      here.pushContext(req.context)
+      // TODO: RPC result
+    })
+
+    socket.on('popContext', function (req) {
+      writeln("popContext", req)
+      let here = session.here || config.here.sessions[req.sessionId]
+      here.popContext()
       // TODO: RPC result
     })
   })
