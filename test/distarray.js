@@ -1,4 +1,5 @@
 var chai = require("chai");
+// var assert = chai.assert
 var chaiAsPromised = require("chai-as-promised");
 chai.should();
 chai.use(chaiAsPromised);
@@ -22,7 +23,17 @@ const testLocaleConfig = {
 var testRun = (fn) => run(fn, testLocaleConfig)
 
 describe("test DistArray", function () {
-  it("test DistArray iterator", function () {
+  it("set", function () {
+    return testRun(() => {
+      return createDomain(Locales, 8)
+        .then((d) => createDistArray(d))
+        .then((a) => a.setAll(2))
+        .then((a) => a.getAll())
+    })
+    .should.eventually.deep.equal([2,2,2,2,2,2,2,2])
+  })
+
+  it("iterator", function () {
     return testRun(() => {
         var assert = require('assert')
         return createDomain(Locales, 2)
@@ -35,6 +46,84 @@ describe("test DistArray", function () {
           .then((a) => a.getAll())
       })
       .should.eventually.deep.equal([5,0])
+  })
+
+  it("map", function () {
+    var q = 0
+    return testRun(() => {
+      return createDomain(Locales, 8)
+        .then((d) => createDistArray(d))
+        .then((a) => a.setAll(1))
+        .then((a) => a.map().do((x) => { var assert = require('assert'); assert(x === 1) }))
+        .then((a) => a.getAll())
+        .should.eventually.deep.equal([1,1,1,1,1,1,1,1])
+    })
+  })
+
+  it("forAll", function () {
+    var q = 0
+    return testRun(() => {
+      return createDomain(Locales, 8)
+        .then((d) => createDistArray(d))
+        .then((a) => a.forAll().set((i, x) => i)) // set values to the index
+        .then((a) => a.forAll().do((i, x) => { var assert = require('assert'); assert(x === i) }))
+        .then((a) => a.getAll())
+        .should.eventually.deep.equal([0,1,2,3,4,5,6,7])
+    })
+  })
+
+  it("zip set via vector addition a + b = c", function () {
+    var q = 0
+    return testRun(() => {
+      return createDomain(Locales, 8)
+        .then((d) => {
+          let calls = []
+          calls.push(createDistArray(d).then((a) => a.setAll(1)))
+          calls.push(createDistArray(d).then((a) => a.setAll(2)))
+          calls.push(createDistArray(d))
+          return Promise.all(calls)
+        })
+        .then((r) => r[2].zip(r[0], r[1]).set((x, y) => x + y)) // zip2?
+        .then((c) => c.getAll())
+        .should.eventually.deep.equal([3,3,3,3,3,3,3,3])
+    })
+  })
+
+  it("zip set via vector addition a + b = c", function () {
+    var q = 0
+    return testRun(() => {
+      return createDomain(Locales, 8)
+        .then((d) => {
+          let calls = []
+          calls.push(createDistArray(d).then((a) => a.setAll(1)))
+          calls.push(createDistArray(d).then((a) => a.setAll(2)))
+          return Promise.all(calls)
+        })
+        .then((r) => r[0].zip(r[0], r[1]).set((x, y) => x + y)) // zip2?
+        .then((a) => a.getAll())
+        .should.eventually.deep.equal([3,3,3,3,3,3,3,3])
+    })
+  })
+
+  /*
+    this should more like: r[0].zip(r[1]).do(...)
+  */
+  it("zip do", function () {
+    var q = 0
+    return testRun(() => {
+      return createDomain(Locales, 8)
+        .then((d) => {
+          let calls = []
+          calls.push(createDistArray(d).then((a) => a.setAll(1)))
+          calls.push(createDistArray(d).then((a) => a.setAll(2)))
+          return Promise.all(calls)
+        })
+        .then((r) => r[0].zip(r[0], r[1]).do((x, y) => {
+          let assert = require('assert')
+          assert(x + y == 3)
+        }))
+        .should.be.fullfilled
+    })
   })
 
   /*
