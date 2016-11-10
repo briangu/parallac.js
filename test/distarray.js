@@ -89,7 +89,7 @@ describe("test DistArray", function () {
     })
   })
 
-  it("zip set via vector addition a + b = c", function () {
+  it("zip set via vector addition reusing a in a + b = a'", function () {
     var q = 0
     return testRun(() => {
       return createDomain(Locales, 8)
