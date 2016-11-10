@@ -105,6 +105,23 @@ describe("test DistArray", function () {
     })
   })
 
+  it("vector addition and ensure locale variation: a + b = c", function () {
+    var q = 0
+    return testRun(() => {
+      return createDomain(Locales, 8)
+        .then((d) => {
+          let calls = []
+          calls.push(createDistArray(d).then((a) => a.setAll(1)))
+          calls.push(createDistArray(d).then((a) => a.forAll().set((i) => i)))
+          calls.push(createDistArray(d))
+          return Promise.all(calls)
+        })
+        .then((r) => r[2].zip(r[0], r[1]).set((x, y) => x + y)) // zip2?
+        .then((c) => c.getAll())
+        .should.eventually.deep.equal([1,2,3,4,5,6,7,8])
+    })
+  })
+
   /*
     this should more like: r[0].zip(r[1]).do(...)
   */
@@ -140,64 +157,64 @@ describe("test DistArray", function () {
   c = a + b
 
   */
-  it("vector addition: a + b = c", function () {
-    return testRun(() => {
-        return createDomain(Locales, 16)
-          .then((d) => {
-            let calls = []
-            calls.push(Promise.resolve(d))
-            calls.push(createDistArray(d))
-            calls.push(createDistArray(d))
-            calls.push(createDistArray(d))
-            return Promise.all(calls)
-          })
-          .then((varr) => {
-            const d = varr[0]
-            const a = varr[1]
-            const b = varr[2]
-            const c = varr[3]
+  // it("vector addition: a + b = c", function () {
+  //   return testRun(() => {
+  //       return createDomain(Locales, 16)
+  //         .then((d) => {
+  //           let calls = []
+  //           calls.push(Promise.resolve(d))
+  //           calls.push(createDistArray(d))
+  //           calls.push(createDistArray(d))
+  //           calls.push(createDistArray(d))
+  //           return Promise.all(calls)
+  //         })
+  //         .then((varr) => {
+  //           const d = varr[0]
+  //           const a = varr[1]
+  //           const b = varr[2]
+  //           const c = varr[3]
 
-            let calls = []
-            calls.push(a.setAll(1))
-            calls.push(b.setAll(2))
+  //           let calls = []
+  //           calls.push(a.setAll(1))
+  //           calls.push(b.setAll(2))
 
-            return Promise.all(calls)
-              .then(() => c.zip(a, b).set((x, y) => x + y))
-              .then(() => c.getAll())
-          })
-      })
-      .should.eventually.be.deep.equal([ 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3 ])
-  })
+  //           return Promise.all(calls)
+  //             .then(() => c.zip(a, b).set((x, y) => x + y))
+  //             .then(() => c.getAll())
+  //         })
+  //     })
+  //     .should.eventually.be.deep.equal([ 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3 ])
+  // })
 
-  it("vector addition and ensure locale variation: a + b = c", function () {
-    return testRun(() => {
-        return createDomain(Locales, 16)
-          .then((d) => {
-            let calls = []
-            calls.push(Promise.resolve(d))
-            calls.push(createDistArray(d))
-            calls.push(createDistArray(d))
-            calls.push(createDistArray(d))
-            return Promise.all(calls)
-          })
-          .then((varr) => {
-            const d = varr[0]
-            const a = varr[1]
-            const b = varr[2]
-            const c = varr[3]
+  // it("vector addition and ensure locale variation: a + b = c", function () {
+  //   return testRun(() => {
+  //       return createDomain(Locales, 16)
+  //         .then((d) => {
+  //           let calls = []
+  //           calls.push(Promise.resolve(d))
+  //           calls.push(createDistArray(d))
+  //           calls.push(createDistArray(d))
+  //           calls.push(createDistArray(d))
+  //           return Promise.all(calls)
+  //         })
+  //         .then((varr) => {
+  //           const d = varr[0]
+  //           const a = varr[1]
+  //           const b = varr[2]
+  //           const c = varr[3]
 
-            let calls = []
-            calls.push(a.setAll(1))
-            calls.push(b.forAll().set((i) => i)) // ensure each locale has different values
+  //           let calls = []
+  //           calls.push(a.setAll(1))
+  //           calls.push(b.forAll().set((i) => i)) // ensure each locale has different values
 
-            // TODO: test forAll puts the right values on the right locales
-            return Promise.all(calls)
-              .then(() => c.zip(a, b).set((x, y) => x + y))
-              .then(() => c.getAll())
-          })
-      })
-      .should.eventually.be.deep.equal([ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 ])
-  })
+  //           // TODO: test forAll puts the right values on the right locales
+  //           return Promise.all(calls)
+  //             .then(() => c.zip(a, b).set((x, y) => x + y))
+  //             .then(() => c.getAll())
+  //         })
+  //     })
+  //     .should.eventually.be.deep.equal([ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 ])
+  // })
 
   // it("", function () {
   //   return .should.be.fulfilled
