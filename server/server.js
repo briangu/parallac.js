@@ -56,6 +56,7 @@ function startServer(config) {
           session.here = here
           for (let i = 0; i < session.Locales.length; i++) {
             if (i === here.id) {
+              writeln("createSession", "local session locale", i, here, session.Locales[i])
               session.Locales[session.here.id] = session.here
               session.here.context().writeln = function () {
                 // package all args and send over the wire for a client-side console.log
@@ -112,7 +113,7 @@ function startServer(config) {
     })
 
     socket.on('on', function (req) {
-      console.log("server", "on", req, Object.keys(config.here.sessions), !!session.here)
+      console.log("server", "on", req, config.here, !!session.here)
       reqFn = JSON.parse(req.fn)
       let here = session.here || config.here.sessions[req.sessionId]
       writeln("server", "on", "here", here)
