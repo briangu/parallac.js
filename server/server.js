@@ -69,7 +69,7 @@ function startServer(config) {
                 })
               }
             } else {
-              writeln("createSession", "remote proxy", i)
+              writeln("createSession", "remote proxy", i, here, session.Locales[i])
               session.Locales[i] = session.Locales[i].createSessionProxy(session.id)
             }
           }
@@ -117,6 +117,7 @@ function startServer(config) {
       let here = session.here || config.here.sessions[req.sessionId]
       writeln("server", "on", "here", here)
       on(here)
+        .with(req.subContext)
         .do(reqFn)
         .then((result) => {
           socket.emit('result', {
@@ -148,20 +149,6 @@ function startServer(config) {
       writeln("setSymbol", req)
       let here = session.here || config.here.sessions[req.sessionId]
       here.setSymbol(req.symbolId, req.value)
-      // TODO: RPC result
-    })
-
-    socket.on('pushContext', function (req) {
-      writeln("pushContext", req)
-      let here = session.here || config.here.sessions[req.sessionId]
-      here.pushContext(req.context)
-      // TODO: RPC result
-    })
-
-    socket.on('popContext', function (req) {
-      writeln("popContext", req)
-      let here = session.here || config.here.sessions[req.sessionId]
-      here.popContext()
       // TODO: RPC result
     })
   })
