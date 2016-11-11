@@ -3,18 +3,21 @@ var http = require('http').Server(app)
 var io = require('socket.io')(http)
 var parallac = require('../lib/parallac')
 var on = parallac.on
-var writeln = console.log
 var uuid = require('uuid')
 
+var debug = () => { }
+var error = console.log
+var info = console.log
+
 function startServer(config) {
-  writeln("hello")
+  info("hello")
 
   app.get('/', function (req, res) {
     res.sendfile('index.html')
   })
 
   app.post('/event', function (req, res) {
-    writeln("post handler", data)
+    debug("post handler", data)
     var req = JSON.parse(data)
     reqFn = JSON.parse(req.fn)
     on(config.Locales[0])
@@ -30,7 +33,7 @@ function startServer(config) {
   var port = parseInt(require('url').parse(config.here.config.URI).port)
 
   http.listen(port, function () {
-    writeln('listening on *:'+port)
+    info('listening on *:'+port)
   })
 
   io.on('connection', function (socket) {
@@ -45,7 +48,7 @@ function startServer(config) {
     }
 
     function createSession(sessionId) {
-      writeln("createSession", "for session id", sessionId)
+      debug("createSession", "for session id", sessionId)
       if (session.id) {
         throw "WARNING: session already exists:" + session.id
       }
@@ -56,7 +59,7 @@ function startServer(config) {
           session.here = here
           for (let i = 0; i < session.Locales.length; i++) {
             if (i === here.id) {
-              writeln("createSession", "local session locale", i, here, session.Locales[i])
+              debug("createSession", "local session locale", i, here, session.Locales[i])
               session.Locales[session.here.id] = session.here
               session.here.context().writeln = function () {
                 // package all args and send over the wire for a client-side console.log
@@ -70,7 +73,7 @@ function startServer(config) {
                 })
               }
             } else {
-              writeln("createSession", "remote proxy", i, here, session.Locales[i])
+              debug("createSession", "remote proxy", i, here, session.Locales[i])
               session.Locales[i] = session.Locales[i].createSessionProxy(session.id)
             }
           }
@@ -81,16 +84,16 @@ function startServer(config) {
           session.here.Locales = session.Locales
           session.here.context().Locales = session.Locales
 
-          writeln("createSession", "session.here", session.here)
+          debug("createSession", "session.here", session.here)
         })
         .catch((err) => {
-          writeln("createSession", "error", err)
+          error("createSession", "error", err)
           throw err
         })
     }
 
     function closeSession() {
-      writeln("closeSession", session.id)
+      debug("closeSession", session.id)
       if (session.id) {
         config.here.closeSessionContext(session.id)
         session = {}
@@ -98,25 +101,25 @@ function startServer(config) {
     }
 
     socket.on('error', function (data) {
-      writeln("error", data)
+      error("error", data)
     })
 
     socket.on('connect', function (data) {
-      writeln("connect", data)
+      debug("connect", data)
     })
 
     socket.on('disconnect', function (data) {
-      writeln("disconnect", session.id)
+      debug("disconnect", session.id)
       if (session.id) {
         closeSession(session.id)
       }
     })
 
     socket.on('on', function (req) {
-      console.log("server", "on", req, config.here, !!session.here)
+      debug("server", "on", req, config.here, !!session.here)
       reqFn = JSON.parse(req.fn)
       let here = session.here || config.here.sessions[req.sessionId]
-      writeln("server", "on", "here", here)
+      debug("server", "on", "here", here)
       on(here)
         .with(req.subContext)
         .do(reqFn)
@@ -128,26 +131,26 @@ function startServer(config) {
           })
         })
         .catch((err) => {
-          writeln('on', 'error', err)
+          error('on', 'error', err)
           throw err
         })
       // TODO: RPC result
     })
 
     socket.on('createSessionContext', function (req) {
-      writeln("createSessionContext", req)
+      debug("createSessionContext", req)
       createSession(req.sessionId)
       // TODO: RPC result
     })
 
     socket.on('closeSessionContext', function (req) {
-      writeln("closeSessionContext", req)
+      debug("closeSessionContext", req)
       closeSession(req.sessionId)
       // TODO: RPC result
     })
 
     socket.on('setSymbol', function (req) {
-      writeln("setSymbol", req)
+      debug("setSymbol", req)
       let here = session.here || config.here.sessions[req.sessionId]
       here.setSymbol(req.symbolId, req.value)
       // TODO: RPC result
