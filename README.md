@@ -70,7 +70,23 @@ As mentioned, the behavior of writeln is basically a "remote" console.log, in th
 Try it!
 -
 
-Start the Parallac cluster (servers):
+Start the Parallac cluster [the easy way]
+--
+
+    $ # deploy 4 servers, locales 0,1,2,3.
+    $ source bin/deploy 4
+
+Run the code on the Parallac cluster:
+--
+
+We tell the client application where the PARALLAC_SERVERS are and run 'hello'
+
+    $ cd examples
+    $ node hello
+    0: hello from locale 0
+    1: hello from locale 1
+
+Start the Parallac cluster (servers): [the hard way]
 --
 
 There are two environment variables that configure services:
@@ -91,18 +107,6 @@ Server 2
     PARALLAC_SERVERS=http://localhost:3000,http://localhost:3001
     $ cd server
     $ node server.js http://localhost:3001
-
-Run the code on the Parallac cluster:
---
-
-We tell the client application where the PARALLAC_SERVERS are and run 'hello'
-
-    $ source bin/setenv.sh
-    PARALLAC_SERVERS=http://localhost:3000,http://localhost:3001
-    $ cd examples
-    $ node hello
-    0: hello from locale 0
-    1: hello from locale 1
 
 License
 =

@@ -3,8 +3,8 @@
 function join_by { local IFS="$1"; shift; echo "$*"; }
 
 HOSTS=()
-UPPER_COUNT=${1-1}
-UPPER_PORT=$((3000+$UPPER_COUNT))
+UPPER_COUNT=${1-2}
+UPPER_PORT=$((3000+$UPPER_COUNT-1))
 for i in `seq 3000 $UPPER_PORT`;
 do
     HOSTS+=("http://localhost:$i")
