@@ -70,11 +70,11 @@ As mentioned, the behavior of writeln is basically a "remote" console.log, in th
 Try it!
 -
 
-Start the Parallac cluster [the easy way]
+Start the Parallac cluster [the easy way] (assuming OSX/Bash)
 --
 
     $ # deploy 4 servers, locales 0,1,2,3.
-    $ source bin/deploy 4
+    $ source bin/deploy.sh 4
 
 Run the code on the Parallac cluster:
 --
@@ -85,6 +85,19 @@ We tell the client application where the PARALLAC_SERVERS are and run 'hello'
     $ node hello
     0: hello from locale 0
     1: hello from locale 1
+
+Stop the servers
+--
+
+    $ # to stop the Parallac servers
+    $ killall node server
+
+Prerequisites
+--
+    * install node.js (https://nodejs.org)
+    * git clone https://github.com/briangu/parallac.js.git
+    * cd parallac.js
+    * npm install
 
 Start the Parallac cluster (servers): [the hard way]
 --
