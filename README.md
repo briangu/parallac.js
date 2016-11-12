@@ -70,7 +70,7 @@ As mentioned, the behavior of writeln is basically a "remote" console.log, in th
 Try it!
 -
 
-Start the Parallac cluster [the easy way] (assuming OSX/Bash)
+Start the Parallac cluster (the easy way) (assuming OSX/Bash)
 --
 
     $ # deploy 4 servers, locales 0,1,2,3.
@@ -101,7 +101,7 @@ Prerequisites
     * cd parallac.js
     * npm install
 
-Start the Parallac cluster (servers): [the hard way]
+Start the Parallac cluster (servers): (the hard way)
 --
 
 There are two environment variables that configure services:
