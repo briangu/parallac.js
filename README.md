@@ -85,6 +85,8 @@ We tell the client application where the PARALLAC_SERVERS are and run 'hello'
     $ node hello
     0: hello from locale 0
     1: hello from locale 1
+    2: hello from locale 2
+    3: hello from locale 3
 
 Stop the servers
 --
