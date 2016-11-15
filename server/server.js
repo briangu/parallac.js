@@ -12,6 +12,10 @@ var info = console.log
 function startServer(config) {
   info("hello")
 
+  if (!config.here) {
+    throw "Missing server host HERE configuration"
+  }
+
   app.get('/', function (req, res) {
     res.sendfile('index.html')
   })
@@ -78,9 +82,6 @@ function startServer(config) {
             }
           }
 
-          // for (let i = 0; i < session.Locales.length; i++) {
-          //   session.Locales[i].Locales = session.Locales
-          // }
           session.here.Locales = session.Locales
           session.here.context().Locales = session.Locales
 
@@ -140,6 +141,15 @@ function startServer(config) {
     socket.on('createSessionContext', function (req) {
       debug("createSessionContext", req)
       createSession(req.sessionId)
+        .then((result) => {
+          socket.emit('result', {
+            sessionId: session.id,
+            requestId: req.requestId,
+            result: {
+              success: true
+            }
+          })
+        })
       // TODO: RPC result
     })
 
@@ -158,6 +168,10 @@ function startServer(config) {
   })
 }
 
+var serverURIs = process.env.PARALLAC_SERVERS || ""
+
 parallac
-  .init()
+  .init({
+    locales: serverURIs.split(',').map((URI) => ({ URI: URI }))
+  })
   .then(startServer)
