@@ -20,19 +20,19 @@ function startServer(config) {
     res.sendfile('index.html')
   })
 
-  app.post('/event', function (req, res) {
-    debug("post handler", data)
-    var req = JSON.parse(data)
-    reqFn = JSON.parse(req.fn)
-    on(config.Locales[0])
-      .do(reqFn)
-      .then((result) => {
-        res.send({
-          id: req.id,
-          result: result
-        })
-      })
-  })
+  // app.post('/event', function (req, res) {
+  //   debug("post handler", data)
+  //   var req = JSON.parse(data)
+  //   reqFn = JSON.parse(req.fn)
+  //   on(config.Locales[0])
+  //     .do(reqFn)
+  //     .then((result) => {
+  //       res.send({
+  //         id: req.id,
+  //         result: result
+  //       })
+  //     })
+  // })
 
   var port = parseInt(require('url').parse(config.here.config.URI).port)
 
@@ -163,7 +163,15 @@ function startServer(config) {
       debug("setSymbol", req)
       let here = session.here || config.here.sessions[req.sessionId]
       here.setSymbol(req.symbolId, req.value)
-      // TODO: RPC result
+        .then((result) => {
+          socket.emit('result', {
+            sessionId: session.id,
+            requestId: req.requestId,
+            result: {
+              success: true
+            }
+          })
+        })
     })
   })
 }
