@@ -7,4 +7,7 @@ var run = parallac.run
 //
 // NOTE: All remote writeln operations are sent back to the client, which is why you can see the output from a remote locale
 //
-run(() => Locales.map((locale) => on(locale).do(() => writeln("hello from locale", here.id))))
+run(() =>
+  Locales.map((locale) =>
+    on(locale).do(() =>
+      writeln("hello from locale", here.id))))
