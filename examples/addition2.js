@@ -18,7 +18,7 @@ c = a + b
 
 */
 run(() => {
-  return createDomain(Locales, 8)
+  return createDomain(Locales, 16)
     .then((d) => {
       let calls = []
       calls.push(createDistArray(d).then((a) => a.setAll(1)))

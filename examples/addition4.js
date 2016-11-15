@@ -13,7 +13,7 @@ let b = DistArray(d)
 let c = DistArray(d)
 
 a = 1
-b = i
+b = 2
 c = a + b
 
 */
@@ -31,9 +31,16 @@ run(() => {
       let b = r[1]
       let c = r[2]
       return c.zip(a, b).set((x, y) => x + y)
-        .then((c) => c.getAll())
+        .then(() => {
+          let calls = []
+          calls.push(a.getAll())
+          calls.push(b.getAll())
+          calls.push(c.getAll())
+          return Promise.all(calls)
+        })
     })
 })
-.then((c) => {
-  console.log("a + b =", JSON.stringify(c))
+.then((results) => {
+  console.log("a + b = c")
+  console.log(results[0] + " + " + results[1] + " = " + results[2])
 })
