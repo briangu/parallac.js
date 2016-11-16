@@ -135,7 +135,6 @@ function startServer(config) {
           error('on', 'error', err)
           throw err
         })
-      // TODO: RPC result
     })
 
     socket.on('createSessionContext', function (req) {
@@ -150,7 +149,6 @@ function startServer(config) {
             }
           })
         })
-      // TODO: RPC result
     })
 
     socket.on('closeSessionContext', function (req) {
