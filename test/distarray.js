@@ -20,7 +20,9 @@ const testLocaleConfig = {
     URI: "memory://1"
   }
 }
-var testRun = (fn) => run(fn, testLocaleConfig)
+var testRun = (fn) => run(fn, {
+  localeConfig: testLocaleConfig
+})
 
 describe("test DistArray", function () {
   it("set", function () {

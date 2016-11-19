@@ -12,7 +12,9 @@ const testLocaleConfig = {
     URI: "memory://1"
   }
 }
-var testRun = (fn) => run(fn, testLocaleConfig)
+var testRun = (fn) => run(fn, {
+  localeConfig: testLocaleConfig
+})
 
 describe("test locale context operations", function () {
   it("return scalar result", function () {

@@ -19,7 +19,9 @@ const testLocaleConfig = {
     URI: "memory://1"
   }
 }
-var testRun = (fn) => run(fn, testLocaleConfig)
+var testRun = (fn) => run(fn, {
+  localeConfig: testLocaleConfig
+})
 
 describe("test locales", function () {
   it("here.id on locale 0", function () {
