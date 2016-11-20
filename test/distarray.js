@@ -160,12 +160,22 @@ describe("test DistArray", function () {
   })
 
   it("matrix", function () {
-    var q = 0
     return testRun(() => {
-      return createDomain(Locales, 8, 8)
+      return createDomain(Locales, 3, 3)
         .then((d) => createDistArray(d))
+        .then((a) => a.forAll().set((i) => i))
         .then((a) => a.getAll())
-        .should.be.fullfilled
+        .should.eventually.deep.equal([0,1,2,3,4,5,6,7,8])
+    })
+  })
+
+  it("matrix - set", function () {
+    return testRun(() => {
+      return createDomain(Locales, 3, 3)
+        .then((d) => createDistArray(d))
+        .then((a) => a.set(4, 99))
+        .then((a) => a.getAll())
+        .should.eventually.deep.equal([0,0,0,0,99,0,0,0,0])
     })
   })
 
