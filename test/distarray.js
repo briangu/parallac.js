@@ -159,6 +159,16 @@ describe("test DistArray", function () {
     })
   })
 
+  it("matrix", function () {
+    var q = 0
+    return testRun(() => {
+      return createDomain(Locales, 8, 8)
+        .then((d) => createDistArray(d))
+        .then((a) => a.getAll())
+        .should.be.fullfilled
+    })
+  })
+
   /*
 
   "assembly language" version of:
