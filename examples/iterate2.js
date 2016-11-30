@@ -8,10 +8,11 @@ run(() => {
     const x = dim[0]
     const y = dim[1]
     for (let j = 0; j < x; j++) {
+      let row = []
       for (let i = 0; i < y; i++) {
-        write("\t"+m[j*x + i])
+        row.push(m[j*x + i])
       }
-      writeln()
+      writeln(row)
     }
     writeln()
   }
