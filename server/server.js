@@ -76,6 +76,18 @@ function startServer(config) {
                   args: JSON.stringify(values)
                 })
               }
+              session.here.context().write = function () {
+                // package all args and send over the wire for a client-side console.log
+                // let values = [session.here.id + ":"]
+                let values = []
+                for (let k of Object.keys(arguments)) {
+                  values.push(arguments[k])
+                }
+                socket.emit('write', {
+                  sessionId: session.id,
+                  args: JSON.stringify(values)
+                })
+              }
             } else {
               debug("createSession", "remote proxy", i, here, session.Locales[i])
               session.Locales[i] = session.Locales[i].createSessionProxy(session.id)
