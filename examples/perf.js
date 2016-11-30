@@ -7,7 +7,7 @@ var run = parallac.run
   Time
 */
 run(() => {
-    count = count || 10000
+    var count = count || 10000
     writeln("iteration count", count)
     var start = new Date().getTime()
     let calls = []
