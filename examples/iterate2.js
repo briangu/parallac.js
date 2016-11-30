@@ -29,9 +29,6 @@ run(() => {
         }
         writeln("done!")
         return a
-        // return a.getAll()
-        //   .then((data) => writeMatrix(a.domain.dim, data))
-        //   .then(() => a)
       })
   }
 
