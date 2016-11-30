@@ -17,7 +17,7 @@ run(() => {
 
   return createDomain(Locales, 8, 8) // 8x8 matrix dimensions
     .then((d) => createDistArray(d))
-    .then((a) => iterate(100000, a))
+    .then((a) => iterate(1000, a))
     .then((a) => a.getAll())
 })
 .then((results) => {
