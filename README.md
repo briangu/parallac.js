@@ -1,13 +1,11 @@
 parallac.js
 =
 
-A Distributed Computing library written for Node.js based on Chapel (http://chapel.cray.com).
+A Distributed Computing library written for Node.js based on [Chapel](http://chapel.cray.com).
 
-Parallac.js creates a set of primitives that allow for data and task parallelism over a cluster of Node.js servers.  Generally, Parallac.js takes a different view of microservices by allowing you to write programs which distribute themselves at runtime to "host" servers.  This allows you to treat a collection of servers (locales) as a single, possibly multi-tenant, computing resource.  With Parallac.js, one can think in terms of "remote lambda" execution, allocating memory "over there" and running code "over there".  Once the host servers are deployed, no additional deploys are necessary to run a new program.  You simply run your program locally and it connects to the cluster, which then executes on the available host servers.
+TL;DR: Parallac.js creates a set of primitives that allow for data and task parallelism over a cluster of Node.js servers.  These primitives can be combined to power a website or perform purely computational tasks.
 
-Node.js (and Javascript ES6) is an important part of this prototype because it has the flexibility that makes Parallac.js possible.  For example, Lambda functions are effectively remoted and evaulated in remote Node VMs.  VM contexts can be managed by the Parallac program to effectively provide custom runtime contexts.  The Inter-server communication is done via a graph of socket.io connections.
-
-Acknowledgement: Parallac.js is heavily based on the concepts of the Chapel Language (https://github.com/chapel-lang).  I have spent a lot of time writing Chapel (and presenting at conferences) and the concepts are really interesting and powerful.  Parallac.js is an experiment in how to bring those concepts to Node.  Node.js is also very powerful but for an entirely different application, so bringing these concepts together is interesting.  (I would have called it Chapel.js but that's probably not doing Chapel any justice.)  Go checkout Chapel (http://chapel.cray.com) if you want to see the real deal.
+Generally, Parallac.js takes a different view of microservices by allowing you to write programs which distribute themselves at runtime to "host" servers.  This allows you to treat a collection of servers (locales) as a single, possibly multi-tenant, computing resource.  With Parallac.js, one can think in terms of "remote lambda" execution, allocating memory "over there" and running code "over there".  Once the host servers are deployed, no additional deploys are necessary to run a new program.  You simply run your program locally and it connects to the cluster, which then executes on the available host servers.
 
 Application ideas
 =
@@ -22,7 +20,7 @@ Application ideas
 Concepts
 =
 
-For a thorough introduction, it is highly recommended to check out the Chapel concepts: http://chapel.cray.com/learning.html
+For a thorough introduction, it is highly recommended to check out the [Chapel concepts](http://chapel.cray.com/learning.html).
 
 Locales
 -
@@ -31,10 +29,12 @@ A Locale is an execution context that contains both memory and processing resour
 
 Typically in the unit of a machine, a locale, in SOA nomenclature, can loosely be translated to a service.  However, in parallac.js, a locale is actually more like an ephemeral vm that remotely runs your code.  The system takes care of communication between locales and you write your program largely thinking of locales in an abstract sense.
 
+Although not supported yet, Locales can be specialized by available resources, whether it's data or computational.  For example, it's reasonable to consider a cluster where each Locale has a specialized set of data or computational resource (e.g. GPU) that code could explicitly be sent to in order to perform a task.
+
 Domains
 -
 
-A Domain is the primary way of describe how memory is distributed over a set of Locales.  Unlike most languages, domains give you the ability to decouple the indices from a data structure, allowing for the ability associate indices with Locales as well as control how the indices are enumerated.
+A Domain is the primary way of describe how memory is distributed over a set of Locales.  Unlike most languages where domains are implicitly part of a data structure, Parallac.js domains give you the ability to decouple the indices from a data structure, allowing for the ability associate indices with Locales as well as control how the indices are enumerated.
 
 When creating a distributed array, for example, first we create the domain and then assign the domain to the distributed array.  In order to ensure that multiple distributed arrays share the same indices and Locales, we can simply create the arrays using the same shared domain.
 
@@ -89,18 +89,16 @@ As mentioned, the behavior of writeln is basically a "remote" console.log, in th
 Try it!
 -
 
-Start the Parallac cluster (the easy way) (assuming OSX/Bash)
+Start a 4-node Parallac cluster (assuming OSX/Bash)
 --
 
-    $ # deploy 4 servers, locales 0,1,2,3.
     $ source bin/deploy.sh 4
 
-Run the code on the Parallac cluster:
+Run the code on the Parallac cluster (notice we don't need to restart the cluster between examples):
 --
 
-We tell the client application where the PARALLAC_SERVERS are and run 'hello'
-
     $ cd examples
+
     $ node hello
     0: hello from locale 0
     1: hello from locale 1
@@ -129,30 +127,13 @@ Prerequisites
 --
     * install node.js (https://nodejs.org)
     * git clone https://github.com/briangu/parallac.js.git
-    * cd parallac.js
-    * npm install
+    * yarn
 
-Start the Parallac cluster (servers): (the hard way)
---
+Acknowledgements:
 
-There are two environment variables that configure services:
+Node.js (and Javascript ES6) is an important part of this prototype because it has the flexibility that makes Parallac.js possible.  For example, Lambda functions are effectively remoted and evaulated in remote Node VMs.  VM contexts can be managed by the Parallac program to effectively provide custom runtime contexts.  The Inter-server communication is done via a graph of socket.io connections.
 
-* PARALLAC_SERVERS is a comma separated list of URIs of Parallac servers
-* PARALLAC_HERE is a URI indicating which of the PARALLAC_SERVERS entries is this locale (here)
-
-Server 1
----
-    $ source bin/setenv.sh
-    PARALLAC_SERVERS=http://localhost:3000,http://localhost:3001
-    $ cd server
-    $ node server.js http://localhost:3000
-
-Server 2
----
-    $ source bin/setenv.sh
-    PARALLAC_SERVERS=http://localhost:3000,http://localhost:3001
-    $ cd server
-    $ node server.js http://localhost:3001
+Parallac.js is heavily based on the concepts of the Chapel Language (https://github.com/chapel-lang).  I have spent a lot of time writing Chapel (and presenting at conferences) and the concepts are really interesting and powerful.  Parallac.js is an experiment in how to bring those concepts to Node.  Node.js is also very powerful but for an entirely different application, so bringing these concepts together is interesting.  (I would have called it Chapel.js but that's probably not doing Chapel any justice.)  Go checkout Chapel (http://chapel.cray.com) if you want to see the real deal.
 
 License
 =
