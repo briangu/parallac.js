@@ -1,9 +1,9 @@
 parallac.js
 =
 
-A Distributed Computing library written for Node.js.
+A Distributed Computing library written for Node.js based on Chapel (http://chapel.cray.com).
 
-Parallac.js takes a different view of microservices by allowing you to write programs which distribute themselves at runtime to "host" servers.  This allows you to treat a collection of servers (locales) as a single, possibly multi-tenant, computing resource.  With Parallac.js, one can think in terms of "remote lambda" execution, allocating memory "over there" and running code "over there".  Once the host servers are deployed, no additional deploys are necessary to run a new program.  You simply run your program locally and it connects to the cluster, which then executes on the available host servers.
+Parallac.js creates a set of primitives that allow for data and task parallelism over a cluster of Node.js servers.  Generally, Parallac.js takes a different view of microservices by allowing you to write programs which distribute themselves at runtime to "host" servers.  This allows you to treat a collection of servers (locales) as a single, possibly multi-tenant, computing resource.  With Parallac.js, one can think in terms of "remote lambda" execution, allocating memory "over there" and running code "over there".  Once the host servers are deployed, no additional deploys are necessary to run a new program.  You simply run your program locally and it connects to the cluster, which then executes on the available host servers.
 
 Node.js (and Javascript ES6) is an important part of this prototype because it has the flexibility that makes Parallac.js possible.  For example, Lambda functions are effectively remoted and evaulated in remote Node VMs.  VM contexts can be managed by the Parallac program to effectively provide custom runtime contexts.  The Inter-server communication is done via a graph of socket.io connections.
 
@@ -12,8 +12,9 @@ Acknowledgement: Parallac.js is heavily based on the concepts of the Chapel Lang
 Application ideas
 =
 
-* Rapid prototyping for IoT devices
 * Distributed web-based applications
+* Distributed memory applications
+* Rapid prototyping for IoT devices
 * A different take on serverless computing
 * A different take on microservices
 * Computation (using data and task parallelism)
@@ -21,12 +22,30 @@ Application ideas
 Concepts
 =
 
+For a thorough introduction, it is highly recommended to check out the Chapel concepts: http://chapel.cray.com/learning.html
+
 Locales
 -
 
 A Locale is an execution context that contains both memory and processing resources.  A typcal distributed computing environment has many locales and programs running in these environments distribute work and memory usage across locales.
 
 Typically in the unit of a machine, a locale, in SOA nomenclature, can loosely be translated to a service.  However, in parallac.js, a locale is actually more like an ephemeral vm that remotely runs your code.  The system takes care of communication between locales and you write your program largely thinking of locales in an abstract sense.
+
+Domains
+-
+
+A Domain is the primary way of describe how memory is distributed over a set of Locales.  Unlike most languages, domains give you the ability to decouple the indices from a data structure, allowing for the ability associate indices with Locales as well as control how the indices are enumerated.
+
+When creating a distributed array, for example, first we create the domain and then assign the domain to the distributed array.  In order to ensure that multiple distributed arrays share the same indices and Locales, we can simply create the arrays using the same shared domain.
+
+Here we create a 1-D domain with 16 elements.  We then create two distributed arrays using the same domain:
+
+    return createDomain(Locales, 16)
+      .then((dom) => {
+        let a = createDistArray(dom)
+        let b = createDistArray(dom)
+        return Promise.all([a, b])
+      })
 
 Examples
 =
@@ -88,11 +107,23 @@ We tell the client application where the PARALLAC_SERVERS are and run 'hello'
     2: hello from locale 2
     3: hello from locale 3
 
+    $ node addition
+    a = 1; a + 1 => [ 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2 ]
+
+    $ node matrix
+	0	1	2	3	4	5	6	7
+	8	9	10	11	12	13	14	15
+	16	17	18	19	20	21	22	23
+	24	25	26	27	28	29	30	31
+	32	33	34	35	36	37	38	39
+	40	41	42	43	44	45	46	47
+	48	49	50	51	52	53	54	55
+	56	57	58	59	60	61	62	63
+
 Stop the servers
 --
 
-    $ # to stop the Parallac servers
-    $ killall node server
+    $ ./bin/shutdown.sh
 
 Prerequisites
 --
