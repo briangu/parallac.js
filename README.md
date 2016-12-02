@@ -53,6 +53,14 @@ Examples
 Hello, World!
 -
 
+Simple Hello, World! from the first Locale.
+
+    run(() => writeln("hello from locale", here.id))
+
+The output will come from Locale 0:
+
+    0: hello from locale 0
+
 The following program executes a writeln (distributed console.log) on each locale and prints the locale id on each locale:
 
     run(() => Locales.map((locale) => on(locale).do(() => writeln("hello from locale", here.id))))
@@ -99,14 +107,23 @@ Run the code on the Parallac cluster (notice we don't need to restart the cluste
 
     $ cd examples
 
+Distributed Hello, World!
+---
+
     $ node hello
     0: hello from locale 0
     1: hello from locale 1
     2: hello from locale 2
     3: hello from locale 3
 
+Distributed Addition
+---
+
     $ node addition
     a = 1; a + 1 => [ 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2 ]
+
+Distributed Matrix
+---
 
     $ node matrix
 	0	1	2	3	4	5	6	7
