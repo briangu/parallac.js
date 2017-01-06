@@ -5,14 +5,7 @@ var run = parallac.run
 
 run(() => {
   function iterate(x, a) {
-    return Promise.resolve(x - 1)
-      .then((x1) => {
-        if (x1 >= 1) {
-          return a.setAll(x1)
-            .then(() => iterate(x1, a))
-        }
-        return a
-      })
+    return (x >= 1) ? a.setAll(x).then(() => iterate(x - 1, a)) : a
   }
 
   return createDomain(Locales, 8, 8) // 8x8 matrix dimensions

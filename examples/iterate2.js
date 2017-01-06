@@ -20,17 +20,14 @@ run(() => {
   function iterate(x, a) {
     writeln("iteration", x)
     writeln()
-    return Promise.resolve(x)
-      .then((x1) => {
-        if (x1 >= 1) {
-          return a.setAll(x1)
-            .then(() => a.getAll())
-            .then((data) => writeMatrix(a.domain.dim, data))
-            .then(() => iterate(x1 - 1, a))
-        }
-        writeln("done!")
-        return a
-      })
+    if (x >= 1) {
+      return a.setAll(x)
+        .then(() => a.getAll())
+        .then((data) => writeMatrix(a.domain.dim, data))
+        .then(() => iterate(x - 1, a))
+    }
+    writeln("done!")
+    return a
   }
 
   return createDomain(Locales, 8, 8) // 8x8 matrix dimensions
