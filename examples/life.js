@@ -5,43 +5,76 @@ var run = parallac.run
 
 run(() => {
   function writeMatrix(dim, m) {
-    const x = dim[0]
-    const y = dim[1]
-    for (let j = 0; j < x; j++) {
+    const dimX = dim[0]
+    const dimY = dim[1]
+
+    for (let y = 0; y < dimY; y++) {
       let row = []
-      for (let i = 0; i < y; i++) {
-        row.push(m[j*x + i])
+      for (let x = 0; x < dimX; x++) {
+        row.push(m[dimX * y + x])
       }
       writeln(row)
     }
     writeln()
   }
 
+  function boundX(a, x) {
+    const dimX = a.domain.dim[0]
+    if (x < 0) {
+      x = dimX - 1
+    } else if (x >= dimX) {
+      x = 0
+    }
+    return x
+  }
+
+  function boundY(a, y) {
+    const dimY = a.domain.dim[1]
+    if (y < 0) {
+      y = dimY - 1
+    } else if (y >= dimY) {
+      y = 0
+    }
+    return y
+  }
+
   function setCell(a, x, y, value) {
-    return a.set(a.domain.dim[0]*x + y, value)
+    const dimX = a.domain.dim[0]
+
+    x = boundX(a, x)
+    y = boundY(a, y)
+
+    return a.set(dimX * y + x, value)
   }
 
   function getCell(a, x, y) {
-    return a.get(a.domain.dim[0]*x + y)
+    const dimX = a.domain.dim[0]
+
+    x = boundX(a, x)
+    y = boundY(a, y)
+
+    return a.get(dimX * y + x)
   }
 
-  function updateCellWithNeighbors(neighbors) {
+  function updateCellWithNeighbors(a, neighbors) {
     let x = neighbors[0][0]
     let y = neighbors[0][1]
     let center = neighbors[1]
-    let north = neighbors[2]
-    let south = neighbors[3]
-    let west = neighbors[4]
-    let east = neighbors[5]
-    let sum = north + south + west + east
 
-    if (sum === 3) {
-      if (center === 1) {
-        return setCell(x, y, 1)
+    let sum = 0
+    for (let i = 2; i < neighbors.length; i++) {
+      sum += neighbors[i]
+    }
+
+    if (center === 1) {
+      if (sum < 2) {
+        return setCell(a, x, y, 0)
+      } else if (sum > 3) {
+        return setCell(a, x, y, 0)
       }
-    } else if (sum === 4) {
-      if (center === 1) {
-        return setCell(x, y, 0)
+    } else {
+      if (sum === 3) {
+        return setCell(a, x, y, 1)
       }
     }
 
@@ -49,29 +82,72 @@ run(() => {
   }
 
   function evolve(a) {
-    const dim = a.domain.dim
-    const x = dim[0]
-    const y = dim[1]
+    const dimX = a.domain.dim[0]
+    const dimY = a.domain.dim[1]
 
     let calls = []
 
-    for (let j = 0; j < x; j++) {
-      for (let i = 0; i < y; i++) {
+    for (let x = 0; x < dimX; x++) {
+      for (let y = 0; y < dimY; y++) {
         let neighbors = []
         neighbors.push(Promise.resolve([x, y]))
-        neighbors.push(getCell(i, j))
-        neighbors.push(getCell(i, j - 1)) // north
-        neighbors.push(getCell(i, j + 1)) // south
-        neighbors.push(getCell(i - 1, j)) // west
-        neighbors.push(getCell(i + 1, j)) // east
+        neighbors.push(getCell(a, x, y))          // center
+
+        neighbors.push(getCell(a, x - 1, y - 1))  // NW
+        neighbors.push(getCell(a, x, y - 1))      // N
+        neighbors.push(getCell(a, x + 1, y - 1))  // NE
+
+        neighbors.push(getCell(a, x - 1, y))      // W
+        neighbors.push(getCell(a, x + 1, y))      // E
+
+        neighbors.push(getCell(a, x - 1, y + 1))  // SW
+        neighbors.push(getCell(a, x, y + 1))      // S
+        neighbors.push(getCell(a, x + 1, y + 1))  // SE
+
         calls.push(Promise.all(neighbors)
-          .then((results) => updateCellWithNeighbors(results)))
+          .then((results) => updateCellWithNeighbors(a, results)))
       }
     }
 
     return Promise.all(calls)
   }
 
+  function randomlyInitialize(a) {
+    const dimX = a.domain.dim[0]
+    const dimY = a.domain.dim[1]
+
+    let calls = []
+
+    for (let x = 0; x < dimX; x++) {
+      for (let y = 0; y < dimY; y++) {
+        if (Math.random() >= 0.45) {
+          calls.push(setCell(a, x, y, 1))
+        }
+      }
+    }
+
+    return Promise.all(calls)
+      .then(() => a)
+  }
+
+  function initializeWithGlider(a) {
+    const dimX = a.domain.dim[0]
+    const dimY = a.domain.dim[1]
+
+    let calls = []
+
+    const midX = 5;
+    const midY = 5;
+
+    calls.push(setCell(a, midX, midY, 1))
+    calls.push(setCell(a, midX + 1, midY, 1))
+    calls.push(setCell(a, midX + 1, midY - 2, 1))
+    calls.push(setCell(a, midX + 2, midY, 1))
+    calls.push(setCell(a, midX + 2, midY - 1, 1))
+
+    return Promise.all(calls)
+      .then(() => a)
+  }
   function iterate(x, a) {
     writeln("iteration", x)
     writeln()
@@ -87,7 +163,19 @@ run(() => {
 
   return createDomain(Locales, 11, 11)
     .then((d) => createDistArray(d))
-    .then((a) => setCell(a, 5, 5, 1))
-    .then((a) => iterate(10, a))
-    .then((a) => a.getAll())
+    // .then((a) => randomlyInitialize(a))
+    .then((a) => initializeWithGlider(a))
+    .then((a) => {
+      return a.getAll().then((data) => {
+        writeMatrix(a.domain.dim, data)
+        return a
+      })
+    })
+    .then((a) => iterate(48, a))
+    .then((a) => {
+      return a.getAll().then((data) => {
+        writeMatrix(a.domain.dim, data)
+        // return a
+      })
+    })
 })
