@@ -153,8 +153,7 @@ run(() => {
     writeln()
     if (x >= 1) {
       return evolve(a)
-        .then(() => a.getAll())
-        .then((data) => writeMatrix(a.domain.dim, data))
+        .then(() => a.getAll().then((data) => writeMatrix(a.domain.dim, data)))
         .then(() => iterate(x - 1, a))
     }
     writeln("done!")
@@ -165,17 +164,7 @@ run(() => {
     .then((d) => createDistArray(d))
     // .then((a) => randomlyInitialize(a))
     .then((a) => initializeWithGlider(a))
-    .then((a) => {
-      return a.getAll().then((data) => {
-        writeMatrix(a.domain.dim, data)
-        return a
-      })
-    })
+    .then((a) => a.getAll().then((data) => writeMatrix(a.domain.dim, data)).then(() => a))
     .then((a) => iterate(48, a))
-    .then((a) => {
-      return a.getAll().then((data) => {
-        writeMatrix(a.domain.dim, data)
-        // return a
-      })
-    })
+    .then((a) => a.getAll().then((data) => writeMatrix(a.domain.dim, data)))
 })
