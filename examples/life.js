@@ -148,6 +148,7 @@ run(() => {
     return Promise.all(calls)
       .then(() => a)
   }
+
   function iterate(x, a) {
     writeln("iteration", x)
     writeln()
