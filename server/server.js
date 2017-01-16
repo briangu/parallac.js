@@ -17,7 +17,7 @@ function startServer(config) {
   }
 
   app.get('/', function (req, res) {
-    res.sendfile('index.html')
+    res.sendfile('server/index.html')
   })
 
   // app.post('/event', function (req, res) {
