@@ -65,6 +65,21 @@ function startServer(config) {
             if (i === here.id) {
               debug("createSession", "local session locale", i, here, session.Locales[i])
               session.Locales[session.here.id] = session.here
+              session.here.context().writeFn = function (fn) {
+                const fnString = fn.toString()
+                // package all args and send over the wire for a client-side console.log
+                Array.prototype.shift.apply(arguments)
+                let values = []
+                for (let k of Object.keys(arguments)) {
+                  values.push(arguments[k])
+                }
+                socket.emit('writeFn', {
+                  sessionId: session.id,
+                  fn: fnString,
+                  args: JSON.stringify(values)
+                })
+              }
+
               session.here.context().writeln = function () {
                 // package all args and send over the wire for a client-side console.log
                 let values = [session.here.id + ":"]
