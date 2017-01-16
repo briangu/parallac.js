@@ -17,7 +17,7 @@ function startServer(config) {
   }
 
   app.get('/', function (req, res) {
-    res.sendfile('server/index.html')
+    res.sendFile('index.html', { root: __dirname });
   })
 
   // app.post('/event', function (req, res) {
