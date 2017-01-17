@@ -1,8 +1,8 @@
 {
   "name": "parallac.js",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "distributed computing experiment based on Chapel",
-  "main": "index.js",
+  "main": "lib/parallac.js",
   "dependencies": {
     "express": "^4.14.0",
     "requestify": "^0.2.4",
