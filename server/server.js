@@ -91,6 +91,8 @@ function startServer(config) {
                   args: JSON.stringify(values)
                 })
               }
+
+              session.here.context().JayTracer = require('./raytracer')
             } else {
               debug("createSession", "remote proxy", i, here, session.Locales[i])
               session.Locales[i] = session.Locales[i].createSessionProxy(session.id)

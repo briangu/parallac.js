@@ -1,0 +1,31 @@
+{
+  "name": "parallac-IDE",
+  "version": "0.0.1",
+  "description": "IDE for Parallac.js",
+  "main": "server.js",
+  "dependencies": {
+    "express": "^4.14.0",
+    "parallac.js": "latest",
+    "requestify": "^0.2.4",
+    "socket.io": "^1.5.0",
+    "uuid": "^2.0.3"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "chai-as-promised": "^6.0.0",
+    "mocha": "^3.1.2"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/briangu/parallac-ide.git"
+  },
+  "author": "Brian Guarraci",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/briangu/parallac-ide/issues"
+  },
+  "homepage": "https://github.com/briangu/parallac-ide#readme"
+}

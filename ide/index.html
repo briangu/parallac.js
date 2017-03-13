@@ -1,0 +1,142 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Parallac.js IDE</title>
+    <!--<link rel="stylesheet" type="text/css" href="http://dc-js.github.io/dc.js/css/dc.css"/>
+    <script type="text/javascript" src="http://dc-js.github.io/dc.js/js/d3.js"></script>
+    <script type="text/javascript" src="http://dc-js.github.io/dc.js/js/crossfilter.js"></script>
+    <script type="text/javascript" src="http://dc-js.github.io/dc.js/js/dc.js"></script>-->
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ace.js"></script>
+    <style>
+         .ace-related-code-highlight {
+           background-color: blue;
+           position:absolute;
+         }
+    </style>
+    <style>
+    #outputCanvasContainer {
+      position: absolute;
+      left:55%;
+    }
+
+    #editor {
+        /** Setting height is also important, otherwise editor wont showup**/
+        height: 95%;
+        position: absolute;
+        /*top: 300px;*/
+        width: 50%;
+    }
+    </style>
+</head>
+<body>
+  <div id="controls">
+    <form id="form-run">
+      <input type="submit" value="Run">
+    </form>
+  </div>
+  <div>
+  <div id="editor"></div>
+  <div>
+  <div id="outputCanvasContainer">
+    <canvas id="outputCanvas" width="240" height="180" style="border:1px solid #d3d3d3;">
+Your browser does not support the HTML5 canvas tag.</canvas>
+  </div>
+  <div id="outputText"></div>
+  </div>
+  </div>
+
+<script>
+var editor = ace.edit("editor");
+
+editor.setTheme("ace/theme/monokai");
+editor.getSession().setMode("ace/mode/javascript");
+editor.getSession().setTabSize(2);
+editor.$blockScrolling = Infinity;
+editor.setReadOnly(false);
+</script>
+
+<script>
+var canvas = document.getElementById("outputCanvas");
+var canvasWidth = canvas.width;
+var canvasHeight = canvas.height;
+var canvasMidX = canvasWidth / 2;
+var canvasMidY = canvasHeight / 2;
+var ctx = canvas.getContext("2d");
+var cid = ctx.getImageData(0, 0, canvasWidth, canvasHeight);
+</script>
+
+<script>
+
+function clear() {
+  console.log("clear");
+  ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+}
+
+function point(x, y, color){
+  color = color || 'black';
+  ctx.strokeStyle = color;
+  ctx.strokeRect(x,y,1,1);
+  ctx.strokeStyle = '#000000';
+}
+
+function putImageData(id, x, y) {
+  // console.log("putImageData", id, x, y);
+  // var cid = ctx.getImageData(0, 0, canvasWidth, canvasHeight);
+  // console.log(cid);
+  for (var i = 0; i < id.data.length; i++) {
+    cid.data[i] = id.data[i];
+  }
+  ctx.putImageData(cid, x, y);
+}
+
+function drawPixel(pos, r, g, b, a) {
+  // console.log("drawPixel", pos, r, g, b, a);
+  var offset = pos * 4;
+  cid.data[offset + 0] = r;
+  cid.data[offset + 1] = g;
+  cid.data[offset + 2] = b;
+  cid.data[offset + 3] = a;
+  // ctx.putImageData(cid, 0, 0);
+}
+
+function flushImage() {
+  ctx.putImageData(cid, 0, 0);
+}
+
+</script>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  var socket = io('http://localhost:8080');
+  socket.on('connect', function(){});
+  socket.on('disconnect', function(){});
+  socket.on('code', function (data) {
+    console.log('code', data);
+    if (editor.getValue().length === 0) {
+      editor.setValue(data.code);
+    }
+  });
+  socket.on('writeln', function(data){
+    // console.log("writeln", data);
+    console.log.apply(null, JSON.parse(data.args));
+  });
+  socket.on('writeFn', function(data){
+    // console.log("writeFn", data);
+    var fn = eval(data.fn);
+    fn.apply(null, JSON.parse(data.args));
+  });
+
+  $( "#form-run" ).submit(function( event ) {
+    event.preventDefault();
+    var code = "() => { " + editor.getValue() + "}";
+    var data = {
+      code: JSON.stringify(code)
+    };
+    socket.emit("run", data);
+  });
+</script>
+</body>
+</html>
