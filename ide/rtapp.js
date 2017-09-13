@@ -9,8 +9,6 @@
 //   }
 // }
 
-var JayTracer = require('./raytracer')
-
 function plotPixel(scene, pos, pix, x, y) {
   let shard = Math.floor(Math.abs(x) * 255) % Locales.length
   return on(Locales[shard])
@@ -33,6 +31,8 @@ function plotPixel(scene, pos, pix, x, y) {
 }
 
 function writeImage(scene, width, height) {
+  var JayTracer = require('./raytracer')
+
   JayTracer.prepareScene(scene);
 
   const id = { 'width': width, 'height': height, 'data': new Array(width * height * 4) };
@@ -102,9 +102,11 @@ let scene = {
   ]
 };
 
+console.log(JSON.stringify(Locales.map(x => x.id)))
+
 // TODO: can we get the size from the browser w/ a kind of "readFn"?
-let width = 480;
-let height = 360;
+let width = 480 / 2;
+let height = 360 / 2;
 
 let time = (new Date()).getTime();
 writeln("started at " + time + " with w=" + width + ", h=" + height);
